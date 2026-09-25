@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '../../services/orderService';
 import { calculateChange } from '../../utils/billing';
-import { Printer, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
+import { CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Card, Button, Modal, Toast } from '../../components/ui';
+import { Receipt } from '../../components/Receipt';
 
 function formatRupiah(n) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
@@ -110,86 +111,7 @@ export default function BillingPage() {
         </button>
 
         {/* Struk — selalu tampil */}
-        <Card className="p-space-lg mb-space-lg print-only">
-          <div className="text-center mb-space-lg">
-            <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Dapur Ina Aina</h2>
-            <p className="font-label-md text-label-md text-on-surface-variant">Struk Pembayaran</p>
-          </div>
-
-          <div className="border-t border-dashed border-outline-variant pt-space-lg mb-space-lg text-body-sm font-body-sm text-on-surface-variant space-y-space-md">
-            <div className="flex justify-between">
-              <span>Invoice</span>
-              <span className="font-mono font-bold text-on-surface">{order.invoice_number}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Pelanggan</span>
-              <span className="text-on-surface">{order.customer_name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>{order.table_number === 'TAKEAWAY' ? 'Tipe' : 'Meja'}</span>
-              <span className="text-on-surface">
-                {order.table_number === 'TAKEAWAY' ? '📦 Take Away' : `Meja ${order.table_number}`}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Waktu</span>
-              <span className="text-on-surface">{formatDate(order.created_at)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Status</span>
-              <span className={isLunas ? 'text-secondary font-bold' : 'text-tertiary font-bold'}>
-                {isLunas ? 'LUNAS' : 'PENDING'}
-              </span>
-            </div>
-
-            {/* Info pembayaran jika sudah lunas */}
-            {(successData || order.payment) && (
-              <>
-                <div className="flex justify-between">
-                  <span>Metode</span>
-                  <span className="text-on-surface">{successData?.payment_method ?? order.payment?.payment_method}</span>
-                </div>
-                {(successData?.payment_method ?? order.payment?.payment_method) === 'TUNAI' && (
-                  <>
-                    <div className="flex justify-between">
-                      <span>Dibayar</span>
-                      <span className="text-on-surface">{formatRupiah(successData?.amount_paid ?? order.payment?.cash_received ?? 0)}</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-secondary">
-                      <span>Kembalian</span>
-                      <span>{formatRupiah(successData?.change_amount ?? order.payment?.change_amount ?? 0)}</span>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Item list */}
-          <table className="w-full text-body-sm font-body-sm mb-space-lg">
-            <thead>
-              <tr className="text-label-md text-on-surface-variant border-b border-outline-variant">
-                <th className="text-left py-space-sm">Item</th>
-                <th className="text-center py-space-sm">Qty</th>
-                <th className="text-right py-space-sm">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.items?.map((item) => (
-                <tr key={item.id_order_item} className="border-b border-dashed border-outline-variant">
-                  <td className="py-space-md text-on-surface">{item.name_menu}</td>
-                  <td className="text-center text-on-surface-variant">{item.quantity}</td>
-                  <td className="text-right font-bold text-on-surface">{formatRupiah(item.subtotal)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="flex justify-between font-bold text-headline-md text-on-surface border-t border-outline-variant pt-space-lg">
-            <span>Total</span>
-            <span>{formatRupiah(order.total_amount)}</span>
-          </div>
-        </Card>
+        <Receipt order={order} payment={successData || order.payment} />
 
         {/* Form pembayaran — hanya jika belum LUNAS */}
         {!isLunas && (
