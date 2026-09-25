@@ -3,15 +3,18 @@ import { useAuth } from '../../context/AuthContext';
 import { LogOut, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useState } from 'react';
+import { Modal, Button } from '../ui';
 
 export function Header() {
   const { user, logout } = useAuth();
   const { cart = [] } = useCart() || {};
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogoutConfirm = () => {
     logout();
+    setShowLogoutConfirm(false);
     navigate('/login');
   };
 
@@ -106,8 +109,8 @@ export function Header() {
                   {user.role === 'cashier' ? '💳 Kasir' : '👑 Admin'}
                 </span>
               </div>
-              <button
-                onClick={handleLogout}
+              <button 
+                onClick={() => setShowLogoutConfirm(true)}
                 className="p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-error transition-all"
                 title="Logout"
               >
@@ -233,6 +236,36 @@ export function Header() {
           </nav>
         </div>
       )}
+      
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutConfirm}
+        title="Konfirmasi Logout"
+        onClose={() => setShowLogoutConfirm(false)}
+      >
+        <div className="space-y-space-lg">
+          <p className="font-body-md text-body-md text-on-surface">
+            Yakin ingin keluar dari sistem?
+          </p>
+          <div className="flex gap-space-md">
+            <Button
+              variant="neutral"
+              onClick={() => setShowLogoutConfirm(false)}
+              className="flex-1"
+            >
+              Batal
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleLogoutConfirm}
+              className="flex-1"
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </header>
   );
 }

@@ -35,7 +35,10 @@ export default function BillingPage() {
   // Payment states
   const [method, setMethod] = useState('TUNAI');
   const [amountPaid, setAmountPaid] = useState('');
-
+  const [cardType, setCardType] = useState('');
+  const [lastFour, setLastFour] = useState('');
+  const [referenceNo, setReferenceNo] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successData, setSuccessData] = useState(null);
@@ -69,6 +72,9 @@ export default function BillingPage() {
       const payload = {
         payment_method: method,
         amount_paid: method === 'TUNAI' ? Number(amountPaid) : order.total_amount,
+        card_type: cardType || undefined,
+        last_four: lastFour || undefined,
+        reference_no: referenceNo || undefined,
       };
       
       const res = await orderService.pay(id, payload);
@@ -110,8 +116,8 @@ export default function BillingPage() {
           <ArrowLeft size={18} /> Kembali ke Pesanan
         </button>
 
-        {/* Struk — selalu tampil */}
-        <Receipt order={order} payment={successData || order.payment} />
+        {/* Struk — hanya tampil setelah bayar sukses */}
+        {successData && <Receipt order={order} payment={successData} />}
 
         {/* Form pembayaran — hanya jika belum LUNAS */}
         {!isLunas && (
