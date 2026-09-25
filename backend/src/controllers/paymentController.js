@@ -45,15 +45,6 @@ exports.processPayment = async (req, res, next) => {
       });
     }
 
-    // Validasi DEBIT/KREDIT/QRIS harus ada reference_no
-    if (['DEBIT', 'KREDIT', 'QRIS'].includes(payment_method) && !reference_no?.trim()) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({
-        success: false,
-        message: `Nomor referensi wajib diisi untuk pembayaran ${payment_method}`,
-      });
-    }
-
     // [BIZ-01 FIX] Cek & kurangi stok di dalam transaksi dengan SELECT FOR UPDATE per item
     for (const item of order.items) {
       // Lock baris menu_item agar tidak ada update stok bersamaan
