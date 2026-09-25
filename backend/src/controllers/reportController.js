@@ -34,7 +34,7 @@ exports.downloadExcelReport = async (req, res) => {
         p.paid_at,
         json_agg(
           json_build_object(
-            'menu_name', m.name,
+            'menu_name', oi.name_menu,
             'quantity', oi.quantity,
             'price', oi.price,
             'subtotal', oi.subtotal
@@ -42,8 +42,7 @@ exports.downloadExcelReport = async (req, res) => {
         ) as items
       FROM orders o
       LEFT JOIN payment p ON o.id_order = p.id_order
-      LEFT JOIN order_items oi ON o.id_order = oi.id_order
-      LEFT JOIN menu m ON oi.id_menu = m.id_menu
+      LEFT JOIN order_item oi ON o.id_order = oi.id_order
       WHERE o.status = 'LUNAS'
         AND p.paid_at >= $1::date
         AND p.paid_at < ($2::date + INTERVAL '1 day')
