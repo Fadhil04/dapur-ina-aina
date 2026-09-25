@@ -24,7 +24,6 @@ exports.downloadExcelReport = async (req, res) => {
         o.id_order,
         o.customer_name,
         o.table_number,
-        o.order_type,
         o.total_amount,
         o.status,
         o.created_at,
@@ -113,7 +112,7 @@ exports.downloadExcelReport = async (req, res) => {
         formatDate(order.paid_at),
         order.id_order,
         order.customer_name,
-        order.order_type === 'DINE_IN' ? `Meja ${order.table_number}` : 'Take Away',
+        order.table_number === 'TAKEAWAY' ? 'Take Away' : `Meja ${order.table_number}`,
         itemsText,
         formatPaymentMethod(order.payment_method, order.card_type),
         order.total_amount
