@@ -93,7 +93,7 @@ export default function CreateOrderPage() {
     try {
       const payload = {
         customer_name: customerName.trim(),
-        table_number: orderMode === 'MEJA' ? tableNumber.trim() : `TAKEAWAY - ${tableNumber || 'No Info'}`,
+        table_number: orderMode === 'MEJA' ? tableNumber.trim() : 'TAKEAWAY',
         items: cart.map(i => ({ id_menu_item: i.id_menu_item, quantity: i.quantity })),
       };
 
@@ -277,17 +277,19 @@ export default function CreateOrderPage() {
               />
             </div>
 
-            <div>
-              <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">
-                {orderMode === 'MEJA' ? 'Nomor Meja' : 'Kontak / Info Tambahan'}
-              </label>
-              <input
-                value={tableNumber}
-                onChange={(e) => setTableNumber(e.target.value)}
-                className="w-full px-space-md py-space-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
-                placeholder={orderMode === 'MEJA' ? 'Contoh: Meja 5' : 'Kontak atau alamat'}
-              />
-            </div>
+            {orderMode === 'MEJA' && (
+              <div>
+                <label className="font-label-lg text-label-lg text-on-surface block mb-space-md">
+                  Nomor Meja
+                </label>
+                <input
+                  value={tableNumber}
+                  onChange={(e) => setTableNumber(e.target.value)}
+                  className="w-full px-space-md py-space-sm border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
+                  placeholder="Contoh: Meja 5"
+                />
+              </div>
+            )}
 
             {error && (
               <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-sm rounded-lg border border-error">
