@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '../../services/orderService';
 import { calculateChange } from '../../utils/billing';
-import { CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
-import { Card, Button, Modal, Toast } from '../../components/ui';
+import { CheckCircle, ArrowLeft, AlertCircle, Printer } from 'lucide-react';
+import { Card, Button, Modal } from '../../components/ui';
+import { Toast } from '../../components/ui/Toast';
 import { Receipt } from '../../components/Receipt';
 
 function formatRupiah(n) {
