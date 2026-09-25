@@ -258,7 +258,26 @@ export default function BillingPage() {
                 </>
               )}
 
-
+              {['DEBIT', 'KREDIT', 'QRIS'].includes(method) && (
+                <>
+                  {(method === 'DEBIT' || method === 'KREDIT') && (
+                    <>
+                      <div>
+                        <p className="text-on-surface-variant">Jenis Kartu</p>
+                        <p className="font-bold text-on-surface">{cardType || '—'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-on-surface-variant">4 Digit Akhir</p>
+                        <p className="font-bold text-on-surface">{lastFour ? `****${lastFour}` : '—'}</p>
+                      </div>
+                    </>
+                  )}
+                  <div className="col-span-2">
+                    <p className="text-on-surface-variant">No. Referensi</p>
+                    <p className="font-bold text-on-surface">{referenceNo || '—'}</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
