@@ -11,7 +11,18 @@ const paySchema = z.object({
   card_type:      z.string().optional(),
   last_four:      z.string().optional(),
   reference_no:   z.string().optional(),
-});
+}).refine(
+  (data) => {
+    // TUNAI harus ada amount_paid (sudah di-check di atas)
+    if (data.payment_method === 'TUNAI') return true;
+    // DEBIT/KREDIT/QRIS harus ada reference_no
+    return data.reference_no?.trim().length > 0;
+  },
+  {
+    message: 'Nomor referensi wajib diisi untuk pembayaran non-tunai',
+    path: ['reference_no'],
+  }
+);
 
 exports.paySchema = paySchema;
 
@@ -36,12 +47,21 @@ exports.processPayment = async (req, res, next) => {
 
     const { payment_method, amount_paid, card_type, last_four, reference_no } = req.body;
 
-    // Validasi tunai: uang diterima harus >= total
+    // Validasi metode pembayaran
     if (payment_method === 'TUNAI' && amount_paid < order.total_amount) {
       await client.query('ROLLBACK');
       return res.status(400).json({
         success: false,
         message: `Uang diterima (${amount_paid}) kurang dari total tagihan (${order.total_amount})`,
+      });
+    }
+
+    // Validasi DEBIT/KREDIT/QRIS harus ada reference_no
+    if (['DEBIT', 'KREDIT', 'QRIS'].includes(payment_method) && !reference_no?.trim()) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: `Nomor referensi wajib diisi untuk pembayaran ${payment_method}`,
       });
     }
 
