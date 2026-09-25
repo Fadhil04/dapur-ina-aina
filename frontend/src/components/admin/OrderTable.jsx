@@ -20,7 +20,7 @@ export default function OrderTable({ orders }) {
           <tr className="bg-surface-container-high/60 text-on-surface-variant font-label-md text-label-md uppercase tracking-wider border-b border-outline-variant">
             <th className="text-left px-space-lg py-space-md">Invoice</th>
             <th className="text-left px-space-lg py-space-md">Pelanggan</th>
-            <th className="text-left px-space-lg py-space-md">Meja</th>
+            <th className="text-left px-space-lg py-space-md">Meja / Tipe</th>
             <th className="text-left px-space-lg py-space-md">Status</th>
             <th className="text-right px-space-lg py-space-md">Total</th>
             <th className="text-center px-space-lg py-space-md">Aksi</th>
@@ -31,7 +31,12 @@ export default function OrderTable({ orders }) {
             <tr key={order.id_order} className="hover:bg-surface-container-low/60 transition-colors">
               <td className="px-space-lg py-space-md font-body-md text-body-md font-mono text-on-surface-variant">{order.invoice_number}</td>
               <td className="px-space-lg py-space-md font-body-md text-body-md text-on-surface font-medium">{order.customer_name}</td>
-              <td className="px-space-lg py-space-md font-body-md text-body-md text-on-surface-variant">Meja {order.table_number}</td>
+              <td className="px-space-lg py-space-md font-body-md text-body-md text-on-surface-variant">
+                {order.table_number === 'TAKEAWAY'
+                  ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant text-label-md font-label-md">📦 Take Away</span>
+                  : `Meja ${order.table_number}`
+                }
+              </td>
               <td className="px-space-lg py-space-md">
                 {order.status === 'LUNAS' ? (
                   <Badge status="lunas">Lunas</Badge>

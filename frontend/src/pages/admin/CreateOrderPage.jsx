@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { menuService } from '../../services/menuService';
 import { orderService } from '../../services/orderService';
-import { Button, Card, Modal, Toast, SearchInput, LoadingCardSkeleton, EmptyState } from '../../components/ui';
+import { Button, Card, Modal, Toast, SearchInput, LoadingCardSkeleton, EmptyState } from '../../components/ui.js';
 import { Plus, Minus, Trash2, ShoppingCart, CheckCircle } from 'lucide-react';
 import CategoryPills from '../../components/customer/CategoryPills';
 
@@ -98,7 +98,7 @@ export default function CreateOrderPage() {
       };
 
       const res = await orderService.checkout(payload);
-      setSuccess(res);
+      setSuccess(res.data);
       
       // Clear form
       setCart([]);
@@ -135,9 +135,10 @@ export default function CreateOrderPage() {
             <p className="font-label-md text-label-md text-on-surface-variant mb-space-sm">Invoice</p>
             <p className="font-display-lg text-headline-lg text-primary font-mono font-bold">{success.invoice_number}</p>
           </div>
-          <p className="font-body-md text-body-md text-on-surface-variant mb-space-xl">
-            Total: {formatRupiah(success.total_amount)}
-          </p>
+          <div className="bg-surface-container rounded-xl p-space-lg mb-space-lg">
+            <p className="font-label-md text-label-md text-on-surface-variant mb-space-sm">Total</p>
+            <p className="font-display-lg text-headline-lg text-secondary font-bold">{formatRupiah(success.total_amount)}</p>
+          </div>
           <Button
             variant="primary"
             onClick={() => setSuccess(null)}

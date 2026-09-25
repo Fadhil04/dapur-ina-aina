@@ -15,10 +15,10 @@ function formatDate(d) {
 }
 
 const PAYMENT_METHODS = [
-  { id: 'TUNAI', label: '💵 Tunai', icon: '💵' },
-  { id: 'DEBIT', label: '💳 Debit', icon: '💳', requiresCard: true },
-  { id: 'KREDIT', label: '💳 Kredit', icon: '💳', requiresCard: true },
-  { id: 'QRIS', label: '📱 QRIS', icon: '📱' },
+  { id: 'TUNAI', label: '💵 Tunai' },
+  { id: 'DEBIT', label: '💳 Debit' },
+  { id: 'KREDIT', label: '💳 Kredit' },
+  { id: 'QRIS', label: '📱 QRIS' },
 ];
 
 export default function BillingPage() {
@@ -34,25 +34,17 @@ export default function BillingPage() {
   // Payment states
   const [method, setMethod] = useState('TUNAI');
   const [amountPaid, setAmountPaid] = useState('');
-  const [cardType, setCardType] = useState('');
-  const [lastFour, setLastFour] = useState('');
-  const [referenceNo, setReferenceNo] = useState('');
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successData, setSuccessData] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const change = method === 'TUNAI' ? calculateChange(amountPaid, order?.total_amount) : 0;
-  const selectedMethod = PAYMENT_METHODS.find(m => m.id === method);
-  const requiresCard = selectedMethod?.requiresCard;
 
   const handleMethodChange = (m) => {
     setMethod(m);
     setAmountPaid('');
-    setCardType('');
-    setLastFour('');
-    setReferenceNo('');
     setError(null);
   };
 
@@ -61,20 +53,6 @@ export default function BillingPage() {
     if (method === 'TUNAI') {
       if (!amountPaid || change < 0) {
         setError('Nominal uang harus >= total tagihan');
-        return false;
-      }
-    } else if (requiresCard) {
-      if (!lastFour || !referenceNo) {
-        setError('Nomor kartu dan referensi pembayaran wajib diisi');
-        return false;
-      }
-      if (lastFour.length !== 4 || !/^\d+$/.test(lastFour)) {
-        setError('4 digit terakhir kartu harus angka');
-        return false;
-      }
-    } else if (method === 'QRIS') {
-      if (!referenceNo) {
-        setError('Nomor referensi QRIS wajib diisi');
         return false;
       }
     }
@@ -90,9 +68,6 @@ export default function BillingPage() {
       const payload = {
         payment_method: method,
         amount_paid: method === 'TUNAI' ? Number(amountPaid) : order.total_amount,
-        card_type: cardType || undefined,
-        last_four: lastFour || undefined,
-        reference_no: referenceNo || undefined,
       };
       
       const res = await orderService.pay(id, payload);
@@ -151,8 +126,10 @@ export default function BillingPage() {
               <span className="text-on-surface">{order.customer_name}</span>
             </div>
             <div className="flex justify-between">
-              <span>Meja</span>
-              <span className="text-on-surface">Meja {order.table_number}</span>
+              <span>{order.table_number === 'TAKEAWAY' ? 'Tipe' : 'Meja'}</span>
+              <span className="text-on-surface">
+                {order.table_number === 'TAKEAWAY' ? '📦 Take Away' : `Meja ${order.table_number}`}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Waktu</span>
@@ -262,62 +239,12 @@ export default function BillingPage() {
               </div>
             )}
 
-            {/* Form Kartu (Debit/Kredit) */}
-            {requiresCard && (
-              <div className="space-y-space-lg mb-space-lg">
-                <div>
-                  <label className="font-label-lg text-label-lg text-on-surface block mb-space-md">
-                    Jenis Kartu
-                  </label>
-                  <select
-                    value={cardType}
-                    onChange={(e) => setCardType(e.target.value)}
-                    className="w-full px-space-lg py-space-md border border-outline-variant rounded-xl text-body-md font-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
-                  >
-                    <option value="">Pilih jenis kartu...</option>
-                    <option value="VISA">Visa</option>
-                    <option value="MASTERCARD">Mastercard</option>
-                    <option value="AMEX">American Express</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-label-lg text-label-lg text-on-surface block mb-space-md">
-                    4 Digit Terakhir Kartu
-                  </label>
-                  <input
-                    type="text"
-                    value={lastFour}
-                    onChange={(e) => setLastFour(e.target.value.slice(0, 4))}
-                    maxLength="4"
-                    className="w-full px-space-lg py-space-md border border-outline-variant rounded-xl text-body-md font-mono font-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
-                    placeholder="0000"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Form Referensi (untuk Debit/Kredit/QRIS) */}
-            {(requiresCard || method === 'QRIS') && (
-              <div className="mb-space-lg">
-                <label className="font-label-lg text-label-lg text-on-surface block mb-space-md">
-                  {method === 'QRIS' ? 'Nomor Referensi QRIS' : 'Nomor Approval / Referensi'}
-                </label>
-                <input
-                  type="text"
-                  value={referenceNo}
-                  onChange={(e) => setReferenceNo(e.target.value)}
-                  className="w-full px-space-lg py-space-md border border-outline-variant rounded-xl text-body-md font-mono font-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
-                  placeholder="Contoh: 123456789ABC"
-                />
-              </div>
-            )}
-
-            {/* Info box */}
+            {/* Info box non-tunai — hanya untuk pendataan */}
             {method !== 'TUNAI' && (
-              <div className="mb-space-lg p-space-lg bg-tertiary-container rounded-xl border-l-4 border-tertiary flex gap-space-md">
-                <AlertCircle size={20} className="text-on-tertiary-container shrink-0 mt-space-xs" />
-                <div className="text-body-sm font-body-sm text-on-tertiary-container">
-                  Total tagihan: <strong>{formatRupiah(order.total_amount)}</strong> akan diproses melalui {method}.
+              <div className="mb-space-lg p-space-lg bg-secondary-container rounded-xl border-l-4 border-secondary flex gap-space-md">
+                <AlertCircle size={20} className="text-on-secondary-container shrink-0 mt-space-xs" />
+                <div className="text-body-sm font-body-sm text-on-secondary-container">
+                  Total <strong>{formatRupiah(order.total_amount)}</strong> akan dicatat sebagai pembayaran <strong>{method}</strong>.
                 </div>
               </div>
             )}
@@ -403,18 +330,7 @@ export default function BillingPage() {
                 </>
               )}
 
-              {requiresCard && (
-                <>
-                  <div>
-                    <p className="text-on-surface-variant">Jenis Kartu</p>
-                    <p className="font-bold text-on-surface">{cardType}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-on-surface-variant">4 Digit Akhir</p>
-                    <p className="font-mono font-bold text-on-surface">****{lastFour}</p>
-                  </div>
-                </>
-              )}
+
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 
-export function Modal({ open, onClose, title, subtitle, children }) {
-  if (!open) return null;
+export function Modal({ open, isOpen, onClose, title, subtitle, children }) {
+  if (!open && !isOpen) return null;
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" onClick={onClose} />

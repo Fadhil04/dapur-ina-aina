@@ -1,5 +1,12 @@
 import { Search } from 'lucide-react';
 
+// Re-export komponen dari file terpisah agar semua import path berjalan benar
+export { Modal } from './Modal.jsx';
+export { EmptyState } from './EmptyState.jsx';
+export { LoadingSkeleton, LoadingCardSkeleton } from './LoadingSkeleton.jsx';
+export { Toast } from './Toast.jsx';
+export { KpiCard } from './KpiCard.jsx';
+
 // Card — Komponen Wrapper Card Standar
 export function Card({ children, className = '' }) {
   return (
