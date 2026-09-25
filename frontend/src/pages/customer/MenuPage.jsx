@@ -1,63 +1,67 @@
-// frontend/src/pages/customer/MenuPage.jsx
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { menuService } from '../../services/menuService'
-import CustomerLayout from '../../layouts/CustomerLayout'
-import CategoryPills from '../../components/customer/CategoryPills'
-import MenuCard from '../../components/customer/MenuCard'
-import { Search } from 'lucide-react'
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { menuService } from '../../services/menuService';
+import CategoryPills from '../../components/customer/CategoryPills';
+import MenuCard from '../../components/customer/MenuCard';
+import { SearchInput, LoadingCardSkeleton, EmptyState } from '../../components/ui';
+import { ShoppingCart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 export default function MenuPage() {
-  const [selectedCategory, setSelectedCategory] = useState(null)
-  const [search, setSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [search, setSearch] = useState('');
+  const navigate = useNavigate();
+  const { cart = [] } = useCart() || {};
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn:  menuService.getCategories,
-  })
+    queryFn: menuService.getCategories,
+  });
 
   const { data: menuItems = [], isLoading, isError } = useQuery({
     queryKey: ['menu', { category: selectedCategory, search }],
-    queryFn:  () => menuService.getMenu({ category: selectedCategory, search: search || undefined }),
-  })
+    queryFn: () => menuService.getMenu({ category: selectedCategory, search: search || undefined }),
+  });
 
   return (
-    <CustomerLayout>
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Menu Kami</h1>
-
-      {/* Search */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Cari menu..."
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
-        />
+    <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl flex flex-col gap-space-lg">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md">
+        <div>
+          <h1 className="font-headline-lg text-headline-lg md:font-headline-lg-mobile md:text-headline-lg-mobile text-on-surface">Menu Kami</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-space-sm">Pilih menu favorit Anda</p>
+        </div>
+        {cart.length > 0 && (
+          <button
+            onClick={() => navigate('/cart')}
+            className="flex items-center gap-space-md px-space-lg py-space-md rounded-xl bg-primary text-on-primary font-label-lg text-label-lg hover:bg-primary-container shadow-sm transition-all"
+          >
+            <ShoppingCart size={20} />
+            Keranjang ({cart.length})
+          </button>
+        )}
       </div>
 
-      {/* Category Pills */}
+      {/* Search Bar */}
+      <SearchInput value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari menu..." />
+
+      {/* Category Filters */}
       <CategoryPills categories={categories} selected={selectedCategory} onSelect={setSelectedCategory} />
 
       {/* Menu Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl h-40 animate-pulse" />
-          ))}
-        </div>
+        <LoadingCardSkeleton count={8} />
       ) : isError ? (
-        <p className="text-center text-red-500 py-10">Gagal memuat menu. Coba lagi.</p>
+        <EmptyState title="Gagal Memuat" description="Terjadi kesalahan saat memuat menu. Coba lagi nanti." />
       ) : menuItems.length === 0 ? (
-        <p className="text-center text-gray-400 py-10">Tidak ada menu ditemukan.</p>
+        <EmptyState title="Menu Tidak Ditemukan" description="Coba ubah filter kategori atau cari dengan kata kunci lain." />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {menuItems.map(menu => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-space-lg">
+          {menuItems.map((menu) => (
             <MenuCard key={menu.id_menu_item} menu={menu} />
           ))}
         </div>
       )}
-    </CustomerLayout>
-  )
+    </div>
+  );
 }

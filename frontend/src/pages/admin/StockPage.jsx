@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { stockService } from '../../services/stockService'
 import { menuService } from '../../services/menuService'
-import DashboardLayout from '../../layouts/DashboardLayout'
+
 import { Plus, Edit2, ArrowUpDown, History } from 'lucide-react'
 
 function formatRupiah(n) {
@@ -163,18 +163,21 @@ export default function StockPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Stok & Menu</h1>
+    <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl flex flex-col gap-space-lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-headline-lg text-headline-lg md:font-headline-lg-mobile md:text-headline-lg-mobile text-on-surface">Stok & Menu</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-space-sm">Kelola katalog menu dan penyesuaian stok</p>
+        </div>
         <button onClick={() => setMenuModal('add')}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-          <Plus size={16} /> Tambah Menu
+          className="flex items-center gap-2 bg-primary hover:bg-primary-container text-on-primary text-label-lg font-label-lg px-space-lg py-space-md rounded-xl transition-colors shadow-sm">
+          <Plus size={18} /> Tambah Menu
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
         {isLoading ? (
-          <div className="py-12 text-center text-gray-400">Memuat stok...</div>
+          <div className="py-space-2xl text-center text-on-surface-variant font-body-md text-body-md">Memuat stok...</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -231,6 +234,6 @@ export default function StockPage() {
           onSave={handleSaved}
         />
       )}
-    </DashboardLayout>
+    </div>
   )
 }

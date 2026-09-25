@@ -2,24 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CSS Custom Properties — Design Tokens */
-:root {
-  --color-primary: #f97316;
-  --color-primary-dark: #ea580c;
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-bg: #f8fafc;
-  --color-sidebar: #1e293b;
+@layer base {
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  body {
+    overscroll-behavior: none;
+  }
 }
 
-body {
-  @apply bg-gray-50 text-gray-900;
-  font-family: 'Inter', system-ui, sans-serif;
+::-webkit-scrollbar {
+  display: none;
 }
 
 /* Print styles untuk struk */
 @media print {
-  .no-print { display: none !important; }
-  .print-only { display: block !important; }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
 }

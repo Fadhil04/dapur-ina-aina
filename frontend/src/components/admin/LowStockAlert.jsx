@@ -1,36 +1,38 @@
-// frontend/src/components/admin/LowStockAlert.jsx
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react';
+import { Card, Badge } from '../ui';
 
 export default function LowStockAlert({ items = [] }) {
   if (!items.length) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-5">
-        <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          <AlertTriangle size={16} className="text-amber-400" /> Stok Menipis
+      <Card className="p-space-lg">
+        <h3 className="font-title-lg text-title-lg text-on-surface mb-space-lg flex items-center gap-space-md">
+          <AlertTriangle size={20} className="text-tertiary" /> Perhatian Stok
         </h3>
-        <p className="text-sm text-gray-400">Semua stok dalam kondisi aman ✅</p>
-      </div>
-    )
+        <p className="font-body-md text-body-md text-on-surface-variant">Semua stok dalam kondisi aman ✅</p>
+      </Card>
+    );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-5">
-      <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-        <AlertTriangle size={16} className="text-amber-400" /> Stok Menipis
-        <span className="ml-auto bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full">
-          {items.length} item
-        </span>
-      </h3>
-      <ul className="space-y-2">
-        {items.map(item => (
-          <li key={item.id_menu_item} className="flex items-center justify-between text-sm">
-            <span className="text-gray-700 truncate">{item.name_menu}</span>
-            <span className={`font-bold ml-2 shrink-0 ${item.stock === 0 ? 'text-red-500' : 'text-amber-500'}`}>
+    <Card className="p-space-lg flex flex-col gap-space-lg">
+      <div className="flex items-center justify-between">
+        <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-space-md">
+          <AlertTriangle size={20} className="text-tertiary" /> Stok Menipis
+        </h3>
+        <Badge status="menipis">{items.length} item</Badge>
+      </div>
+      <ul className="space-y-space-md">
+        {items.map((item) => (
+          <li key={item.id_menu_item} className="flex items-center justify-between">
+            <span className="font-body-md text-body-md text-on-surface truncate">{item.name_menu}</span>
+            <span className={`font-label-lg text-label-lg ml-space-md shrink-0 ${
+              item.stock === 0 ? 'text-error' : 'text-tertiary'
+            }`}>
               {item.stock === 0 ? 'Habis' : `Sisa ${item.stock}`}
             </span>
           </li>
         ))}
       </ul>
-    </div>
-  )
+    </Card>
+  );
 }

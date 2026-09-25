@@ -1,159 +1,255 @@
-// frontend/src/pages/customer/CartPage.jsx
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useCart } from '../../context/CartContext'
-import { orderService } from '../../services/orderService'
-import CustomerLayout from '../../layouts/CustomerLayout'
-import { Trash2, Plus, Minus, ShoppingBag, CheckCircle } from 'lucide-react'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import { orderService } from '../../services/orderService';
+import { Trash2, Plus, Minus, CheckCircle } from 'lucide-react';
+import { Button, Card, EmptyState, Toast } from '../../components/ui';
 
 function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 }
 
 export default function CartPage() {
-  const { cart, removeItem, updateQuantity, clearCart, totalPrice } = useCart()
-  const navigate = useNavigate()
+  const { cart, removeItem, updateQuantity, clearCart, totalPrice } = useCart();
+  const navigate = useNavigate();
 
-  const [form, setForm] = useState({ customer_name: '', table_number: '' })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  const [form, setForm] = useState({ customer_name: '', table_number: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleQtyChange = (id, delta, current) => {
-    const next = current + delta
-    if (next <= 0) removeItem(id)
-    else updateQuantity(id, next)
-  }
+    const next = current + delta;
+    if (next <= 0) removeItem(id);
+    else updateQuantity(id, next);
+  };
 
   const handleCheckout = async (e) => {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
     if (!form.customer_name.trim() || !form.table_number.trim()) {
-      setError('Nama dan nomor meja wajib diisi.')
-      return
+      setError('Nama dan nomor meja wajib diisi.');
+      return;
     }
     if (cart.length === 0) {
-      setError('Keranjang kosong.')
-      return
+      setError('Keranjang kosong.');
+      return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const payload = {
         customer_name: form.customer_name.trim(),
-        table_number:  form.table_number.trim(),
-        items: cart.map(i => ({ id_menu_item: i.id_menu_item, quantity: i.quantity })),
-      }
-      const res = await orderService.checkout(payload)
-      clearCart()
-      setSuccess(res.data)
+        table_number: form.table_number.trim(),
+        items: cart.map((i) => ({ id_menu_item: i.id_menu_item, quantity: i.quantity })),
+      };
+      const res = await orderService.checkout(payload);
+      clearCart();
+      setSuccess(res.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal membuat pesanan. Coba lagi.')
+      setError(err.response?.data?.message || 'Gagal membuat pesanan. Coba lagi.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (success) {
     return (
-      <CustomerLayout>
-        <div className="max-w-md mx-auto text-center py-16">
-          <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Pesanan Berhasil!</h2>
-          <p className="text-gray-500 mb-1">Invoice: <span className="font-mono font-semibold text-gray-800">{success.invoice_number}</span></p>
-          <p className="text-gray-500 mb-6">Pesananmu sedang diproses kasir.</p>
-          <button
-            onClick={() => navigate('/menu')}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors"
+      <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <Card className="max-w-md w-full p-space-2xl">
+          {/* Success Icon */}
+          <div className="flex justify-center mb-space-xl">
+            <div className="w-20 h-20 bg-secondary-container rounded-full flex items-center justify-center">
+              <CheckCircle size={40} className="text-on-secondary-container" />
+            </div>
+          </div>
+
+          {/* Main Message */}
+          <h2 className="font-headline-lg text-headline-lg text-on-surface text-center mb-space-lg">Pesanan Berhasil Dibuat!</h2>
+
+          {/* Invoice Number - Prominent */}
+          <div className="bg-surface-container rounded-xl p-space-lg mb-space-lg text-center">
+            <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-space-sm">Nomor Invoice</p>
+            <p className="font-display-lg text-headline-lg text-primary font-bold font-mono">{success.invoice_number}</p>
+          </div>
+
+          {/* Amount */}
+          <div className="text-center mb-space-lg">
+            <p className="font-body-md text-body-md text-on-surface-variant mb-space-sm">Total Tagihan</p>
+            <p className="font-display-lg text-headline-lg text-on-surface">{formatRupiah(success.total_amount)}</p>
+          </div>
+
+          {/* Instructions Card */}
+          <div className="bg-tertiary-fixed rounded-xl p-space-lg mb-space-xl border-l-4 border-tertiary">
+            <h3 className="font-title-md text-title-md text-on-tertiary-fixed-variant font-bold mb-space-md">📍 Langkah Selanjutnya:</h3>
+            <ol className="space-y-space-sm font-body-md text-body-md text-on-tertiary-fixed-variant">
+              <li className="flex gap-space-md">
+                <span className="font-bold shrink-0">1.</span>
+                <span>Pergi ke <strong>Meja Kasir</strong> dengan nomor invoice di atas</span>
+              </li>
+              <li className="flex gap-space-md">
+                <span className="font-bold shrink-0">2.</span>
+                <span>Tunjukkan nomor invoice ke kasir</span>
+              </li>
+              <li className="flex gap-space-md">
+                <span className="font-bold shrink-0">3.</span>
+                <span>Lakukan pembayaran sesuai total tagihan</span>
+              </li>
+              <li className="flex gap-space-md">
+                <span className="font-bold shrink-0">4.</span>
+                <span>Tunggu pesanan Anda di meja makan</span>
+              </li>
+            </ol>
+          </div>
+
+          {/* Info Message */}
+          <div className="bg-surface-container rounded-xl p-space-lg mb-space-xl text-center">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              ✨ Pesanan Anda telah dicatat. Kasir akan segera memproses pembayaran dan dapur akan menyiapkan makanan Anda.
+            </p>
+          </div>
+
+          {/* Action Button */}
+          <Button 
+            variant="primary" 
+            onClick={() => {
+              navigate('/menu');
+              // Clear success state untuk next order
+            }} 
+            className="w-full"
           >
             Pesan Lagi
-          </button>
-        </div>
-      </CustomerLayout>
-    )
+          </Button>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <CustomerLayout>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Keranjang</h1>
+    <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl flex flex-col gap-space-lg">
+      <div>
+        <h1 className="font-headline-lg text-headline-lg md:font-headline-lg-mobile md:text-headline-lg-mobile text-on-surface">Keranjang Pesanan</h1>
+        <p className="font-body-md text-body-md text-on-surface-variant mt-space-sm">
+          {cart.length > 0 ? `${cart.length} item dalam keranjang` : 'Keranjang Anda kosong'}
+        </p>
+      </div>
 
       {cart.length === 0 ? (
-        <div className="text-center py-16">
-          <ShoppingBag className="mx-auto text-gray-300 mb-4" size={64} />
-          <p className="text-gray-400 mb-4">Keranjang kosong</p>
-          <button onClick={() => navigate('/menu')} className="text-orange-500 hover:underline font-medium">
-            Lihat Menu
-          </button>
-        </div>
+        <EmptyState
+          title="Keranjang Kosong"
+          description="Belum ada menu yang dipilih. Kembali ke halaman menu untuk memulai pesanan."
+        />
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Item list */}
-          <div className="md:col-span-2 space-y-3">
-            {cart.map(item => (
-              <div key={item.id_menu_item} className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-800 text-sm">{item.name_menu}</p>
-                  <p className="text-orange-500 text-sm">{formatRupiah(item.price)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => handleQtyChange(item.id_menu_item, -1, item.quantity)} className="w-7 h-7 rounded-full border flex items-center justify-center hover:bg-gray-100">
-                    <Minus size={14} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+          {/* Item List */}
+          <div className="lg:col-span-2 flex flex-col gap-space-lg">
+            <div className="space-y-space-md">
+              {cart.map((item) => (
+                <Card key={item.id_menu_item} className="p-space-lg flex items-center gap-space-lg justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-title-md text-title-md text-on-surface">{item.name_menu}</h3>
+                    <p className="font-currency-md text-currency-md text-primary mt-space-xs">{formatRupiah(item.price)}</p>
+                  </div>
+
+                  <div className="flex items-center gap-space-md bg-surface-container rounded-xl p-space-xs">
+                    <button
+                      onClick={() => handleQtyChange(item.id_menu_item, -1, item.quantity)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface-variant"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="w-6 text-center font-label-lg text-label-lg text-on-surface">{item.quantity}</span>
+                    <button
+                      onClick={() => handleQtyChange(item.id_menu_item, 1, item.quantity)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-container-high transition-colors text-on-surface-variant"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+
+                  <div className="text-right min-w-max">
+                    <p className="font-currency-md text-currency-md text-on-surface">{formatRupiah(item.price * item.quantity)}</p>
+                  </div>
+
+                  <button
+                    onClick={() => removeItem(item.id_menu_item)}
+                    className="p-2 rounded-lg hover:bg-error-container text-on-surface-variant hover:text-error transition-colors"
+                  >
+                    <Trash2 size={18} />
                   </button>
-                  <span className="w-6 text-center font-semibold text-sm">{item.quantity}</span>
-                  <button onClick={() => handleQtyChange(item.id_menu_item, 1, item.quantity)} className="w-7 h-7 rounded-full border flex items-center justify-center hover:bg-gray-100">
-                    <Plus size={14} />
-                  </button>
-                </div>
-                <p className="w-24 text-right font-semibold text-sm">{formatRupiah(item.price * item.quantity)}</p>
-                <button onClick={() => removeItem(item.id_menu_item)} className="text-gray-300 hover:text-red-400 transition-colors">
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
 
-          {/* Order form & summary */}
-          <div className="bg-white rounded-xl shadow-sm p-5 h-fit">
-            <h2 className="font-bold text-gray-800 mb-4">Detail Pemesanan</h2>
-            <form onSubmit={handleCheckout} className="space-y-3">
+          {/* Form & Summary */}
+          <Card className="p-space-lg h-fit flex flex-col gap-space-lg sticky top-24">
+            <div>
+              <h2 className="font-title-lg text-title-lg text-on-surface">Detail Pemesanan</h2>
+            </div>
+
+            <form onSubmit={handleCheckout} className="space-y-space-lg">
               <div>
-                <label className="text-xs text-gray-500 font-medium">Nama Pemesan</label>
+                <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">Nama Pemesan</label>
                 <input
                   value={form.customer_name}
-                  onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))}
-                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  onChange={(e) => setForm((f) => ({ ...f, customer_name: e.target.value }))}
+                  className="w-full px-4 py-2.5 border border-outline-variant rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
                   placeholder="Nama kamu"
+                  required
                 />
               </div>
+
               <div>
-                <label className="text-xs text-gray-500 font-medium">Nomor Meja</label>
+                <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">Nomor Meja</label>
                 <input
                   value={form.table_number}
-                  onChange={e => setForm(f => ({ ...f, table_number: e.target.value }))}
-                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                  placeholder="Meja 1"
+                  onChange={(e) => setForm((f) => ({ ...f, table_number: e.target.value }))}
+                  className="w-full px-4 py-2.5 border border-outline-variant rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
+                  placeholder="Contoh: Meja 5"
+                  required
                 />
               </div>
 
-              {error && <p className="text-red-500 text-xs bg-red-50 p-2 rounded-lg">{error}</p>}
+              {error && (
+                <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-md rounded-xl border border-error">
+                  {error}
+                </div>
+              )}
 
-              <div className="border-t pt-3 mt-2">
-                <div className="flex justify-between font-bold text-gray-800">
-                  <span>Total</span>
-                  <span>{formatRupiah(totalPrice)}</span>
+              <div className="border-t border-outline-variant pt-space-lg">
+                <div className="flex justify-between mb-space-lg">
+                  <span className="font-label-lg text-label-lg text-on-surface-variant">Subtotal</span>
+                  <span className="font-currency-md text-currency-md text-on-surface">{formatRupiah(totalPrice)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-title-lg text-title-lg text-on-surface">Total</span>
+                  <span className="font-display-lg text-headline-lg text-primary">{formatRupiah(totalPrice)}</span>
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-2.5 rounded-xl font-semibold transition-colors"
+                variant="primary"
+                disabled={loading || cart.length === 0}
+                className="w-full"
               >
-                {loading ? 'Memproses...' : '🛒 Pesan Sekarang'}
-              </button>
+                {loading ? 'Memproses...' : 'Pesan Sekarang'}
+              </Button>
+
+              <Button
+                type="button"
+                variant="neutral"
+                onClick={() => navigate('/menu')}
+                className="w-full"
+              >
+                Lanjut Belanja
+              </Button>
             </form>
-          </div>
+          </Card>
         </div>
       )}
-    </CustomerLayout>
-  )
+
+      {error && <Toast title="Error" message={error} type="error" onClose={() => setError(null)} duration={5000} />}
+    </div>
+  );
 }

@@ -1,11 +1,11 @@
 // frontend/src/pages/admin/BillingPage.jsx
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { orderService } from '../../services/orderService'
-import { calculateChange } from '../../utils/billing'
-import DashboardLayout from '../../layouts/DashboardLayout'
-import { Printer, CheckCircle, ArrowLeft } from 'lucide-react'
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { orderService } from '../../services/orderService';
+import { calculateChange } from '../../utils/billing';
+import { Printer, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Card, Button } from '../../components/ui';
 
 function formatRupiah(n) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
@@ -67,21 +67,21 @@ export default function BillingPage() {
   }
 
   if (isLoading) return (
-    <DashboardLayout>
-      <div className="py-20 text-center text-gray-400">Memuat data pesanan...</div>
-    </DashboardLayout>
+    <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl">
+      <div className="py-20 text-center text-on-surface-variant font-body-md text-body-md">Memuat data pesanan...</div>
+    </div>
   )
   if (isError || !order) return (
-    <DashboardLayout>
-      <div className="py-20 text-center text-red-500">Pesanan tidak ditemukan.</div>
-    </DashboardLayout>
+    <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl">
+      <div className="py-20 text-center text-error font-body-md text-body-md">Pesanan tidak ditemukan.</div>
+    </div>
   )
 
   const isLunas = order.status === 'LUNAS' || successData
 
   return (
-    <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
+    <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl">
+      <div className="max-w-2xl">
         <button
           onClick={() => navigate('/orders')}
           className="flex items-center gap-1 text-sm text-gray-500 hover:text-orange-500 mb-5 transition-colors"
@@ -262,6 +262,6 @@ export default function BillingPage() {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
