@@ -11,18 +11,7 @@ const paySchema = z.object({
   card_type:      z.string().optional(),
   last_four:      z.string().optional(),
   reference_no:   z.string().optional(),
-}).refine(
-  (data) => {
-    // TUNAI harus ada amount_paid (sudah di-check di atas)
-    if (data.payment_method === 'TUNAI') return true;
-    // DEBIT/KREDIT/QRIS harus ada reference_no
-    return data.reference_no?.trim().length > 0;
-  },
-  {
-    message: 'Nomor referensi wajib diisi untuk pembayaran non-tunai',
-    path: ['reference_no'],
-  }
-);
+});
 
 exports.paySchema = paySchema;
 
