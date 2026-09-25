@@ -1,6 +1,6 @@
 // backend/src/controllers/reportController.js
 const ExcelJS = require('exceljs');
-const pool = require('../config/database');
+const pool = require('../config/db');
 
 /**
  * Generate Excel report untuk transaksi dalam rentang tanggal
