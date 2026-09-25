@@ -10,6 +10,7 @@ const MenuPage = lazy(() => import('./pages/customer/MenuPage'));
 const CartPage = lazy(() => import('./pages/customer/CartPage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const OrdersPage = lazy(() => import('./pages/admin/OrdersPage'));
+const CreateOrderPage = lazy(() => import('./pages/admin/CreateOrderPage'));
 const BillingPage = lazy(() => import('./pages/admin/BillingPage'));
 const StockPage = lazy(() => import('./pages/admin/StockPage'));
 const StockHistoryPage = lazy(() => import('./pages/admin/StockHistoryPage'));
@@ -64,6 +65,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <OrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateOrderPage />
                   </ProtectedRoute>
                 }
               />

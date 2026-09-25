@@ -6,7 +6,7 @@ const Payment       = require('../models/paymentModel');
 const StockMovement = require('../models/stockMovementModel');
 
 const paySchema = z.object({
-  payment_method: z.enum(['TUNAI', 'NON_TUNAI'], { errorMap: () => ({ message: 'Metode pembayaran tidak valid' }) }),
+  payment_method: z.enum(['TUNAI', 'DEBIT', 'KREDIT', 'QRIS'], { errorMap: () => ({ message: 'Metode pembayaran tidak valid' }) }),
   amount_paid:    z.coerce.number().positive('Nominal bayar harus lebih dari 0'),
   card_type:      z.string().optional(),
   last_four:      z.string().optional(),

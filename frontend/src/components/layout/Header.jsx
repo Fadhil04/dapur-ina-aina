@@ -32,12 +32,20 @@ export function Header() {
           </NavLink>
           
           {user && user.role === 'cashier' && (
-            <NavLink 
-              to="/orders"
-              className={({ isActive }) => isActive ? 'bg-primary text-on-primary px-4 py-2 rounded-xl font-label-lg text-label-lg' : 'text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg'}
-            >
-              Pesanan
-            </NavLink>
+            <div className="flex gap-space-sm">
+              <NavLink 
+                to="/orders"
+                className={({ isActive }) => isActive ? 'bg-primary text-on-primary px-4 py-2 rounded-xl font-label-lg text-label-lg' : 'text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg'}
+              >
+                Pesanan
+              </NavLink>
+              <NavLink 
+                to="/orders/create"
+                className={({ isActive }) => isActive ? 'bg-primary text-on-primary px-4 py-2 rounded-xl font-label-lg text-label-lg' : 'text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg'}
+              >
+                Buat Pesanan
+              </NavLink>
+            </div>
           )}
 
           {user && user.role === 'admin' && (

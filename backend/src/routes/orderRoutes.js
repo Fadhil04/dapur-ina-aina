@@ -9,6 +9,9 @@ const paymentController = require('../controllers/paymentController');
 // Public — pelanggan checkout
 router.post('/checkout', validate(orderController.checkoutSchema), orderController.checkout);
 
+// Protected — kasir buat pesanan untuk pelanggan (meja/take away)
+router.post('/create-for-customer', verifyToken, validate(orderController.checkoutSchema), orderController.checkout);
+
 // Protected — kasir & admin
 router.get('/',        verifyToken, orderController.listOrders);
 router.get('/counts',  verifyToken, orderController.getOrderCounts);

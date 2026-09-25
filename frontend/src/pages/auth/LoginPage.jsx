@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import api from '../../services/api';
-import { Button } from '../../components/ui';
+import { Button, Modal } from '../../components/ui';
 import { Toast } from '../../components/ui/Toast';
 
 export default function LoginPage() {
@@ -14,17 +14,29 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setError(null);
+    if (!form.username.trim() || !form.password.trim()) {
+      setError('Username dan password wajib diisi');
+      return;
+    }
+    setShowConfirm(true);
+  };
+
+  const handleLoginConfirm = async () => {
     setError(null);
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', form);
       login(data.data.token, data.data.user);
+      setShowConfirm(false);
       navigate('/orders');
     } catch (err) {
       setError(err.response?.data?.message || 'Login gagal. Periksa username dan password.');
+      setShowConfirm(false);
     } finally {
       setLoading(false);
     }
@@ -101,6 +113,36 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+
+      {/* Konfirmasi Modal Login */}
+      <Modal
+        isOpen={showConfirm}
+        title="Konfirmasi Login"
+        onClose={() => setShowConfirm(false)}
+      >
+        <div className="space-y-space-lg">
+          <p className="font-body-md text-body-md text-on-surface">
+            Yakin ingin masuk sebagai <strong>{form.username}</strong>?
+          </p>
+          <div className="flex gap-space-md">
+            <Button
+              variant="neutral"
+              onClick={() => setShowConfirm(false)}
+              className="flex-1"
+            >
+              Batal
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleLoginConfirm}
+              disabled={loading}
+              className="flex-1"
+            >
+              {loading ? 'Login...' : 'Konfirmasi'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {error && <Toast title="Error" message={error} type="error" onClose={() => setError(null)} duration={5000} />}
     </div>
