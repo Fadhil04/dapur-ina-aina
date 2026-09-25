@@ -98,7 +98,7 @@ export default function CreateOrderPage() {
       };
 
       const res = await orderService.checkout(payload);
-      setSuccess(res.data);
+      setSuccess(res);
       
       // Clear form
       setCart([]);
