@@ -1,6 +1,6 @@
 # 📖 Dokumentasi Lengkap & Rangkuman Sistem — Dapur Ina Aina
 
-Sistem Informasi Manajemen Pemesanan, Kasir, dan Mutasi Stok Restoran & Cafe berbasis Web (**Express.js + PostgreSQL + EJS**).
+Sistem Informasi Manajemen Pemesanan, Kasir, dan Mutasi Stok Restoran & Cafe berbasis Web (**Monorepo: Express.js + React + PostgreSQL + Vite**).
 
 ---
 
@@ -33,20 +33,25 @@ Sistem Informasi Manajemen Pemesanan, Kasir, dan Mutasi Stok Restoran & Cafe ber
 
 ## 2. Arsitektur & Tech Stack
 
-Sistem dibangun menggunakan pola **MVC (Model-View-Controller)**:
+**Monorepo Architecture**: Dapur Ina Aina kini menggunakan pola monorepo dengan **React SPA** untuk frontend dan **Express.js REST API** untuk backend:
 
-- **Backend Runtime**: [Node.js](https://nodejs.org/) (v18+)
-- **Web Framework**: [Express.js](https://expressjs.com/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/) (didukung *connection pooling* via `pg`)
-- **Template Engine**: [EJS (Embedded JavaScript Templates)](https://ejs.co/)
-- **Styling UI/UX**: Custom Modern CSS Design System (Glassmorphism, Vibrant Palette, Micro-animations, Print Receipt Styling)
-- **Visualisasi Grafik**: [Chart.js](https://www.chartjs.org/) (Dashboard pendapatan & omset)
-- **Keamanan & Middleware**:
-  - `bcrypt`: Hashing password aman
-  - `express-session` + `connect-pg-simple`: Manajemen sesi terenkripsi yang persisten di PostgreSQL
-  - `helmet`: Pengaturan HTTP Security Headers
-  - `morgan`: Request HTTP Logger
-  - `method-override`: Dukungan HTTP verbs `PUT` dan `DELETE` dari form HTML
+### Frontend (React SPA)
+- **Framework**: React 19 + Vite (TypeScript/JSX)
+- **Styling**: Tailwind CSS + CSS Modules
+- **Routing**: React Router DOM v6
+- **State Management**: React Context API + Zustand
+- **Data Fetching**: Axios + React Query (@tanstack/react-query)
+- **Charts**: Chart.js + react-chartjs-2
+- **Icons**: Lucide React
+
+### Backend (REST API)
+- **Runtime**: Node.js (v18+)
+- **Framework**: Express.js 4
+- **Database**: PostgreSQL + pg (node-postgres)
+- **Authentication**: JWT (JSON Web Tokens) + bcrypt
+- **Validation**: Zod (schema validation)
+- **Excel Export**: ExcelJS (untuk laporan Excel)
+- **Security Middleware**: Helmet, CORS, express-rate-limit
 
 ---
 
@@ -67,122 +72,140 @@ Sistem dibangun menggunakan pola **MVC (Model-View-Controller)**:
 | **FR-11** | Riwayat Audit Mutasi Stok | Riwayat jejak audit stok per menu: stok awal, perubahan (+/-), stok akhir, pencatat, & waktu | Admin |
 | **FR-12** | Dashboard Analitik & Metrik | Grafik omset 7 hari terakhir, omset hari ini, total pesanan pending & lunas, tabel peringatan stok tipis | Admin, Kasir |
 | **FR-13** | Role-Based Access Control | Pembatasan hak akses berbasis peran (`admin` vs `cashier`) pada tingkat middleware | Sistem |
+| **FR-14** | Laporan Excel Sales Report | Admin-only sales report dengan Excel download dan date range picker (tingkat meja) | Admin |
 
 ---
 
-## 4. Struktur Direktori Proyek
+## 4. Struktur Direktori Proyek (Monorepo)
 
 ```text
-dapur_ina_aina/
-├── public/                     # Asset Statis Publik
-│   ├── css/
-│   │   └── style.css           # Desain Sistem & Komponen CSS Modern
-│   └── js/
-│       └── main.js             # Interaktivitas UI, Kalkulasi Kembalian, Print Struk
-├── src/
-│   ├── config/                 # Konfigurasi Inti
-│   │   ├── db.js               # Pool Koneksi Database PostgreSQL
-│   │   └── session.js          # Konfigurasi Session Store PostgreSQL
-│   ├── controllers/            # Controller Logika Bisnis (MVC)
-│   │   ├── authController.js       # Login & Logout Autentikasi
-│   │   ├── customerController.js   # Katalog Menu, Keranjang, Checkout Pelanggan
-│   │   ├── dashboardController.js  # Metrik & Grafik Dashboard
-│   │   ├── orderController.js      # Daftar Pesanan & Detail Billing
-│   │   ├── paymentController.js    # Eksekusi Pembayaran & Deduct Stok
-│   │   └── stockController.js      # CRUD Menu & Mutasi Stok
-│   ├── middlewares/            # Middleware
-│   │   ├── auth.js             # Guard Autentikasi & RBAC (Role Checker)
-│   │   └── errorHandler.js     # Error Handler Terpusat
-│   ├── models/                 # Model Data & Kueri Database
-│   │   ├── menuItemModel.js        # Kueri Menu & Kategori
-│   │   ├── orderModel.js           # Kueri Header Pesanan & Items
-│   │   ├── paymentModel.js         # Kueri Transaksi Pembayaran
-│   │   ├── stockMovementModel.js   # Kueri Pencatatan Mutasi Stok
-│   │   └── userModel.js            # Kueri Pengguna & Verifikasi Bcrypt
-│   ├── routes/                 # Routing Endpoint
-│   │   ├── authRoutes.js           # /login, /logout
-│   │   ├── customerRoutes.js       # /menu, /menu/cart, /cart, /cart/checkout
-│   │   ├── dashboardRoutes.js      # /dashboard
-│   │   ├── orderRoutes.js          # /orders, /orders/:id/billing
-│   │   ├── paymentRoutes.js        # /orders/:id/pay
-│   │   └── stockRoutes.js          # /stock, /stock/update, /stock/menu/*
-│   └── views/                  # Tampilan Antarmuka EJS
-│       ├── auth/login.ejs          # Form Login Petugas
-│       ├── customer/
-│       │   ├── menu.ejs            # Katalog Menu Publik
-│       │   └── cart.ejs            # Keranjang Belanja & Checkout
-│       ├── dashboard/index.ejs     # Dashboard Utama
-│       ├── orders/
-│       │   ├── index.ejs           # Tabel Antrean Pesanan
-│       │   └── billing.ejs         # Billing, Struk & Form Kasir
-│       ├── stock/
-│       │   ├── index.ejs           # Tabel Stok & Mutasi
-│       │   ├── menu_form.ejs       # Form Tambah/Edit Menu
-│       │   └── history.ejs         # Riwayat Log Mutasi Menu
-│       ├── partials/
-│       │   ├── header.ejs          # Navbar, Metadata, Layout Atas
-│       │   └── footer.ejs          # Footer, Layout Bawah
-│       └── errors/
-│           ├── 404.ejs             # Halaman Not Found
-│           └── 500.ejs             # Halaman Internal Error
-├── tests/                      # Suite Pengujian Otomatis
-│   ├── e2e_flow_test.js        # Uji Flow Pelanggan, Auth, Navigasi
-│   └── e2e_advanced_test.js    # Uji Pembayaran, Mutasi Stok, RBAC
-├── .env                        # Variabel Lingkungan Database & Port
-├── package.json                # Dependensi Proyek
-└── server.js                   # Entry Point Utama Aplikasi
+dapur_ina_aina/ (ROOT MONOREPO)
+├── backend/                    # Express.js REST API
+│   ├── src/
+│   │   ├── config/            # Konfigurasi Database, Middleware
+│   │   │   ├── db.js          # PostgreSQL Pool Connection
+│   │   │   └── session.js     # JWT Configuration
+│   │   ├── controllers/       # Controller Business Logic
+│   │   │   ├── authController.js      # Login, Logout, JWT Auth
+│   │   │   ├── menuController.js      # CRUD Menu & Kategori
+│   │   │   ├── orderController.js     # Order Management
+│   │   │   ├── paymentController.js   # Payment Processing
+│   │   │   ├── stockController.js     # Stock CRUD & Mutations
+│   │   │   ├── dashboardController.js # Dashboard Analytics
+│   │   │   └── reportController.js    # Excel Report Generation
+│   │   ├── middlewares/       # Middleware Layers
+│   │   │   ├── auth.js        # JWT Authentication & RBAC
+│   │   │   ├── validator.js   # Zod Input Validation
+│   │   │   └── errorHandler.js # Global Error Handler
+│   │   ├── models/            # Database Models & Queries
+│   │   │   ├── userModel.js          # Users & Authentication
+│   │   │   ├── menuItemModel.js      # Menu Items & Categories
+│   │   │   ├── orderModel.js         # Orders & Order Items
+│   │   │   ├── paymentModel.js       # Payment Transactions
+│   │   │   └── stockMovementModel.js # Stock Audit Trail
+│   │   ├── routes/            # REST API Routes
+│   │   │   ├── api.js         # Master Router /api/v1
+│   │   │   ├── authRoutes.js          # /auth
+│   │   │   ├── menuRoutes.js          # /menu
+│   │   │   ├── orderRoutes.js         # /orders
+│   │   │   ├── stockRoutes.js         # /stock (admin only)
+│   │   │   ├── dashboardRoutes.js     # /dashboard (admin only)
+│   │   │   └── reportRoutes.js        # /reports (admin only)
+│   │   └── server.js          # Express Server Entry Point
+│   ├── tests/                 # Automated Tests
+│   │   └── e2e_flow.test.js   # E2E Test Suite
+│   ├── scripts/               # Database & Migration Scripts
+│   │   ├── update_passwords.js
+│   │   └── migrate_add_image.js
+│   └── package.json           # Backend Dependencies
+├── frontend/                  # React SPA Application
+│   ├── src/
+│   │   ├── components/        # Reusable UI Components
+│   │   │   ├── ui/            # Base UI Components
+│   │   │   │   ├── Toast.jsx          # Notification Toast
+│   │   │   │   ├── Modal.jsx          # Dialog Modal
+│   │   │   │   ├── LoadingSkeleton.jsx
+│   │   │   │   ├── KpiCard.jsx        # KPI Stat Card
+│   │   │   │   └── EmptyState.jsx     # Empty State UI
+│   │   │   ├── customer/      # Customer-Facing Components
+│   │   │   │   ├── MenuCard.jsx       # Menu Item Card
+│   │   │   │   └── CategoryPills.jsx  # Category Filter Pills
+│   │   │   ├── admin/         # Admin Dashboard Components
+│   │   │   │   ├── StatCard.jsx       # Dashboard Stats
+│   │   │   │   ├── RevenueChart.jsx   # Revenue Charts
+│   │   │   │   ├── OrderTable.jsx     # Orders Table
+│   │   │   │   └── LowStockAlert.jsx  # Low Stock Alerts
+│   │   │   └── layout/        # Layout Components
+│   │   │       ├── Header.jsx         # Navigation Header
+│   │   │       └── Footer.jsx         # Page Footer
+│   │   ├── pages/            # Page Components
+│   │   │   ├── auth/LoginPage.jsx     # Login Page
+│   │   │   ├── customer/              # Customer Pages
+│   │   │   │   ├── MenuPage.jsx       # Menu Catalog
+│   │   │   │   └── CartPage.jsx       # Shopping Cart
+│   │   │   └── admin/                 # Admin Pages
+│   │   │       ├── DashboardPage.jsx  # Analytics Dashboard
+│   │   │       ├── OrdersPage.jsx     # Orders Management
+│   │   │       ├── CreateOrderPage.jsx # Create New Order
+│   │   │       ├── BillingPage.jsx    # Billing & Payment
+│   │   │       ├── StockPage.jsx      # Stock Management
+│   │   │       └── StockHistoryPage.jsx # Stock Audit History
+│   │   ├── context/          # React Context Providers
+│   │   │   ├── AuthContext.jsx        # Authentication State
+│   │   │   └── CartContext.jsx        # Shopping Cart State
+│   │   ├── hooks/            # Custom React Hooks
+│   │   ├── utils/            # Utility Functions
+│   │   ├── App.jsx           # Main App Component & Routing
+│   │   └── main.jsx          # Application Entry Point
+│   └── package.json          # Frontend Dependencies
+├── package.json              # Root Monorepo Config
+│   ├── dev:backend           # Run backend dev server
+│   ├── dev:frontend          # Run frontend dev server
+│   └── dev:all               # Run both concurrently
+├── .gitignore                # Git Ignore Rules
+├── .env                      # Environment Variables
+└── RANGKUMAN_PROJEK.md       # This Documentation
 ```
 
 ---
 
-## 5. Struktur Navigasi & Alur Routing
+## 5. Struktur Navigasi & Alur Routing (React SPA)
 
 ```mermaid
 graph TD
-    Root["/ (Root URL)"] -->|Redirect| Menu["/menu (Katalog Menu Publik)"]
+    Root["/ (Root)"] -->|Redirect| Menu["/menu (Menu Catalog)"]
     
-    subgraph Alur Pelanggan [Area Publik Pelanggan]
-        Menu -->|Pilih Item & Qty| AddCart["POST /menu/cart"]
-        AddCart --> Menu
-        Menu -->|Buka Keranjang| Cart["GET /cart (Keranjang Pesanan)"]
-        Cart -->|Hapus Item| RemoveCart["POST /cart/remove/:id"]
-        RemoveCart --> Cart
-        Cart -->|Kirim Order| Checkout["POST /cart/checkout"]
-        Checkout -->|Nomor Invoice Terbit| CartSuccess["Tampilan Sukses Invoice"]
+    subgraph Public Area [Public - Customer]
+        Menu -->|Pilih Item & Qty| Cart["/cart (Shopping Cart)"]
+        Cart -->|Checkout| OrderSuccess["Order Success Page"]
+        Menu --> Login["/login (Staff Login)"]
     end
-
-    subgraph Alur Autentikasi [Login & Keamanan]
-        Login["GET /login (Form Login Kasir/Admin)"]
-        SubmitLogin["POST /login (Verifikasi Kredensial)"]
-        Logout["POST /logout (Hancurkan Sesi)"]
-        Login --> SubmitLogin
-        SubmitLogin -->|Sukses| OrdersNav["Redirect -> /orders"]
-        SubmitLogin -->|Gagal| Login
-        Logout --> Login
+    
+    subgraph Protected Area [Staff Dashboard - Protected by JWT]
+        Login -->|Success Redirect| Orders["/orders (Orders List)"]
+        Orders -->|Create New| CreateOrder["/orders/create"]
+        Orders -->|View Details| Billing["/orders/:id/billing"]
+        Orders -->|Admin Only| Dashboard["/dashboard"]
+        Dashboard -->|Admin Only| Stock["/stock"]
+        Stock -->|View History| StockHistory["/stock/:id/history"]
     end
-
-    subgraph Area Kasir & Admin [Staff Dashboard]
-        OrdersNav --> OrdersList["GET /orders (Daftar Antrean Pesanan)"]
-        OrdersList --> FilterOrder["GET /orders?status=PENDING/LUNAS&page=X"]
-        OrdersList --> Billing["GET /orders/:id/billing (Billing & Struk)"]
-        Billing --> ProcessPay["POST /orders/:id/pay (Bayar Tunai/Non-Tunai)"]
-        ProcessPay -->|Update Lunas + Deduct Stok| Billing
-        Billing --> PrintReceipt["Print Struk (Cetak Kertas Kasir)"]
-        
-        Dashboard["GET /dashboard (Metrik Omset & Grafik Chart.js)"]
-    end
-
-    subgraph Area Khusus Administrator [Role: admin Only]
-        Stock["GET /stock (Manajemen Stok & Mutasi)"]
-        Stock --> AddStock["POST /stock/update (Tambah/Rusak Stok)"]
-        Stock --> AddMenuForm["GET /stock/menu/add (Form Menu Baru)"]
-        AddMenuForm --> CreateMenu["POST /stock/menu"]
-        Stock --> EditMenuForm["GET /stock/menu/:id/edit (Edit Menu)"]
-        EditMenuForm --> UpdateMenu["PUT /stock/menu/:id"]
-        Stock --> DeleteMenu["DELETE /stock/menu/:id (Soft Deactivate)"]
-        Stock --> HistoryStock["GET /stock/:id/history (Riwayat Mutasi)"]
+    
+    subgraph RBAC Protection [Role-Based Access Control]
+        Orders -- Allowed --> Kasir["Role: cashier"]
+        Orders -- Allowed --> Admin["Role: admin"]
+        Dashboard -- Only --> Admin
+        Stock -- Only --> Admin
     end
 ```
+
+**API Endpoints**:
+- `POST /api/v1/auth/login` - Login staff
+- `GET /api/v1/menu` - Get all menu items
+- `POST /api/v1/orders` - Create new order
+- `GET /api/v1/orders` - List orders (filter by status)
+- `POST /api/v1/orders/:id/pay` - Process payment
+- `GET /api/v1/dashboard` - Dashboard metrics (admin only)
+- `GET /api/v1/reports/sales` - Sales report Excel (admin only)
 
 ---
 
@@ -201,16 +224,17 @@ graph LR
         UC2[Kelola Keranjang Belanja]
         UC3[Checkout & Buat Pesanan Meja]
         
-        UC4[Login / Logout Sistem]
+        UC4[Login / Logout Sistem via JWT]
         UC5[Lihat Daftar Pesanan & Filter Status]
         UC6[Lihat Billing & Rincian Tagihan]
         UC7[Proses Pembayaran Tunai / Non-Tunai]
         UC8[Cetak Struk Transaksi]
         UC9[Lihat Dashboard & Grafik Omset]
+        UC10[Unduh Laporan Excel Penjualan]
 
-        UC10[Kelola Katalog Menu Tambah/Edit/Hapus]
-        UC11[Update Mutasi Stok Manual Tambah/Rusak]
-        UC12[Lihat Riwayat & Jejak Audit Mutasi Stok]
+        UC11[Kelola Katalog Menu Tambah/Edit/Hapus]
+        UC12[Update Mutasi Stok Manual Tambah/Rusak]
+        UC13[Lihat Riwayat & Jejak Audit Mutasi Stok]
     end
 
     actorCustomer --> UC1
@@ -233,206 +257,7 @@ graph LR
     actorAdmin --> UC10
     actorAdmin --> UC11
     actorAdmin --> UC12
-```
-
----
-
-### 6.2 Activity Diagram — Alur Pemesanan Pelanggan
-
-```mermaid
-stateDiagram-v2
-    [*] --> BukaMenu: Akses /menu
-    BukaMenu --> PilihKategori: Filter Kategori / Cari Menu
-    PilihKategori --> TambahKeKeranjang: Klik 'Tambah ke Keranjang'
-    TambahKeKeranjang --> BukaKeranjang: Buka /cart
-    
-    state KeranjangCheck <<choice>>
-    BukaKeranjang --> KeranjangCheck
-    KeranjangCheck --> BukaMenu: Ubah / Tambah Menu Lain
-    KeranjangCheck --> InputDataMeja: Keranjang Sesuai
-
-    InputDataMeja --> KlikCheckout: Isi Nama Pemesan & No Meja
-    
-    state ValidasiCheckout <<choice>>
-    KlikCheckout --> ValidasiCheckout: Validasi Stok & Meja (SELECT FOR UPDATE)
-    ValidasiCheckout --> KeranjangError: Stok Tidak Cukup / Data Kosong
-    KeranjangError --> BukaKeranjang: Tampilkan Pesan Error
-    
-    ValidasiCheckout --> SimpanPesanan: Stok Cukup
-    SimpanPesanan --> TerbitkanInvoice: Insert orders & order_items
-    TerbitkanInvoice --> KosongkanKeranjang: Session Cart Di-reset
-    KosongkanKeranjang --> TampilSukses: Tampilkan Nomor Invoice & Status PENDING
-    TampilSukses --> [*]
-```
-
----
-
-### 6.3 Activity Diagram — Alur Pembayaran Kasir & Pengurangan Stok
-
-```mermaid
-stateDiagram-v2
-    [*] --> BukaDaftarPesanan: Kasir Login & Buka /orders
-    BukaDaftarPesanan --> PilihPesananPending: Klik Pesanan Status PENDING
-    PilihPesananPending --> BukaBilling: Akses /orders/:id/billing
-    BukaBilling --> PilihMetodeBayar: Pilih Metode Pembayaran
-
-    state CekMetode <<choice>>
-    PilihMetodeBayar --> CekMetode
-    
-    CekMetode --> FormTunai: Metode TUNAI
-    FormTunai --> InputNominalUang: Masukkan Uang Diterima
-    
-    CekMetode --> FormNonTunai: Metode NON-TUNAI
-    FormNonTunai --> InputRefCard: Masukkan Kartu/QRIS & No Ref Approval
-
-    state ValidasiBayar <<choice>>
-    InputNominalUang --> ValidasiBayar: Submit Pembayaran
-    InputRefCard --> ValidasiBayar: Submit Pembayaran
-
-    ValidasiBayar --> TolakBayar: Uang Kurang / Ref Kosong
-    TolakBayar --> BukaBilling: Tampilkan Error Tagihan
-
-    ValidasiBayar --> MulaiTransaksiDB: Data Valid (BEGIN)
-    MulaiTransaksiDB --> InsertPayment: Simpan ke tabel payments
-    InsertPayment --> UpdateStatusOrder: Set orders.status = 'LUNAS' & id_user kasir
-    
-    state LoopItems {
-        [*] --> KurangiStokMenu: UPDATE menu_item.stock = stock - qty
-        KurangiStokMenu --> CatatMutasiJual: INSERT stock_movement (type: 'PENJUALAN')
-        CatatMutasiJual --> [*]
-    }
-    
-    UpdateStatusOrder --> LoopItems
-    LoopItems --> CommitTransaksi: Transaksi Sukses (COMMIT)
-    CommitTransaksi --> TampilBillingLunas: Tampilkan Rincian Lunas & Kembalian
-    TampilBillingLunas --> CetakStruk: Klik 'Cetak Struk'
-    CetakStruk --> [*]
-```
-
----
-
-### 6.4 Activity Diagram — Alur Penyesuaian Mutasi Stok Admin
-
-```mermaid
-stateDiagram-v2
-    [*] --> LoginAdmin: Admin Login
-    LoginAdmin --> BukaMenuStok: Akses /stock
-    BukaMenuStok --> PilihAksi: Pilih Menu yang Ingin Disesuaikan
-    
-    state CabangAksi <<choice>>
-    PilihAksi --> CabangAksi
-    
-    CabangAksi --> ModalMutasi: Klik 'Sesuaikan Stok'
-    ModalMutasi --> FormMutasi: Pilih Jenis (TAMBAH / RUSAK) & Jumlah
-    FormMutasi --> SimpanMutasi: Submit Mutasi Stok
-    SimpanMutasi --> UpdateStokDB: Update stock menu & catat stock_movement
-    UpdateStokDB --> BukaMenuStok: Tampilkan Tabel Terkini
-    
-    CabangAksi --> BukaHistory: Klik 'Riwayat Mutasi'
-    BukaHistory --> TampilAuditLog: Menampilkan Log Mutasi Perubahan Stok
-    TampilAuditLog --> [*]
-```
-
----
-
-### 6.5 Class Diagram
-
-```mermaid
-classDiagram
-    class User {
-        +int id_user
-        +string name_user
-        +string username
-        +string password
-        +string role
-        +boolean is_active
-        +timestamp created_at
-        +findByUsername(username)
-        +verifyPassword(plain, hash)
-        +hashPassword(plain)
-    }
-
-    class Category {
-        +int id_category
-        +string name_category
-    }
-
-    class MenuItem {
-        +int id_menu_item
-        +int id_category
-        +string name_menu
-        +decimal price
-        +int stock
-        +boolean is_active
-        +findAll(filters)
-        +findById(id)
-        +create(data)
-        +update(id, data)
-        +updateStock(id, newStock, client)
-        +deactivate(id)
-    }
-
-    class Order {
-        +int id_order
-        +int id_user
-        +string invoice_number
-        +string customer_name
-        +string table_number
-        +string status
-        +decimal total_amount
-        +timestamp created_at
-        +createOrder(data, client)
-        +findAll(options)
-        +findById(id)
-        +assignCashierAndSetStatus(id, idUser, status, client)
-        +getCounts()
-    }
-
-    class OrderItem {
-        +int id_order_item
-        +int id_order
-        +int id_menu_item
-        +int quantity
-        +decimal price
-        +decimal subtotal
-    }
-
-    class Payment {
-        +int id_payment
-        +int id_order
-        +string payment_method
-        +decimal amount_paid
-        +decimal cash_received
-        +decimal change_amount
-        +string card_type
-        +string last_four
-        +string reference_no
-        +timestamp created_at
-        +create(data, client)
-        +findByOrderId(id_order)
-    }
-
-    class StockMovement {
-        +int id_stock_movement
-        +int id_menu_item
-        +int id_user
-        +string type
-        +int quantity_before
-        +int quantity_change
-        +int quantity_after
-        +string note
-        +timestamp created_at
-        +create(data, client)
-        +findByMenuItem(id_menu_item)
-    }
-
-    Category "1" -- "0..*" MenuItem : mengelompokkan
-    User "1" -- "0..*" Order : memproses_kasir
-    User "1" -- "0..*" StockMovement : mencatat
-    Order "1" -- "1..*" OrderItem : memiliki
-    MenuItem "1" -- "0..*" OrderItem : dipesan_dalam
-    Order "1" -- "0..1" Payment : dilunasi_oleh
-    MenuItem "1" -- "0..*" StockMovement : memiliki_riwayat
+    actorAdmin --> UC13
 ```
 
 ---
@@ -472,6 +297,7 @@ erDiagram
         decimal price
         int stock
         boolean is_active
+        varchar image_url
         timestamp created_at
         timestamp updated_at
     }
@@ -531,9 +357,17 @@ Aplikasi dilengkapi dengan sistem keamanan **Role-Based Access Control (RBAC)**:
 
 | Peran (Role) | Kredensial Default | Hak Akses & Pembatasan |
 |---|---|---|
-| **Administrator** | Username: `admin`<br>Password: `admin123` | **Akses Penuh (Full Access)**:<br>- Dashboard analitik & grafik omset<br>- Manajemen & antrean pesanan<br>- Proses billing kasir & cetak struk<br>- Manajemen stok produk & input mutasi<br>- Tambah/Edit/Hapus menu masakan |
-| **Kasir (Cashier)** | Username: `kasir1`<br>Password: `kasir123` | **Operasional Kasir**:<br>- Melihat antrean pesanan meja<br>- Memproses pembayaran (Tunai & Non-Tunai)<br>- Mencetak struk transaksi pelanggan<br>- *Dilarang (403 Forbidden) mengakses menu stok & katalog* |
+| **Administrator** | Username: `admin`<br>Password: `admin123` | **Akses Penuh (Full Access)**:<br>- Dashboard analitik & grafik omset<br>- Manajemen & antrean pesanan<br>- Proses billing kasir & cetak struk<br>- Manajemen stok produk & input mutasi<br>- Tambah/Edit/Hapus menu masakan<br>- Unduh laporan Excel penjualan |
+| **Kasir (Cashier)** | Username: `kasir1`<br>Password: `kasir123` | **Operasional Kasir**:<br>- Melihat antrean pesanan meja<br>- Memproses pembayaran (Tunai & Non-Tunai)<br>- Mencetak struk transaksi pelanggan<br>- *Dilarang (403 Forbidden) mengakses menu stok, katalog, dan dashboard admin* |
 | **Pelanggan (Publik)**| *Tanpa Login* | **Pemesanan Mandiri**:<br>- Melihat katalog buku menu & harga<br>- Mengelola keranjang belanja<br>- Checkout mandiri berdasarkan nomor meja |
+
+**Authentication Flow**:
+1. Staff login via `/login` page
+2. Backend validates credentials, generates JWT token
+3. Token stored in localStorage / HTTP-only cookie
+4. Frontend includes token in `Authorization: Bearer <token>` header
+5. Backend middleware validates token for protected routes
+6. RBAC middleware checks user role for admin-only endpoints
 
 ---
 
@@ -542,34 +376,109 @@ Aplikasi dilengkapi dengan sistem keamanan **Role-Based Access Control (RBAC)**:
 ### Persyaratan Sistem
 - [Node.js](https://nodejs.org/) v18 atau lebih baru
 - [PostgreSQL](https://www.postgresql.org/) v14 atau lebih baru
+- [Git](https://git-scm.com/) (untuk cloning)
 
 ### 1. Konfigurasi Environment (`.env`)
-Pastikan file `.env` di root proyek telah dikonfigurasi:
+Buat file `.env` di root direktori dengan konfigurasi berikut:
 ```env
-PORT=3000
+# Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=YOUR_POSTGRES_PASSWORD
 DB_NAME=dapur_ina_aina
-SESSION_SECRET=supersecret_session_key_dapur_ina_aina_2026
+
+# JWT Configuration
+JWT_SECRET=supersecret_jwt_key_dapur_ina_aina_2026
+JWT_EXPIRES_IN=24h
+
+# Server Ports
+BACKEND_PORT=3001
+FRONTEND_PORT=5173
+
+# CORS Origin
+CORS_ORIGIN=http://localhost:5173
 ```
 
-### 2. Menjalankan Server
+### 2. Setup Database
 ```bash
-# Menjalankan aplikasi
-npm start
-# atau
-node server.js
-```
-Akses aplikasi melalui browser di: **http://localhost:3000**
+# Login ke PostgreSQL dan buat database
+psql -U postgres
+CREATE DATABASE dapur_ina_aina;
 
-### 3. Menjalankan Uji Otomatis (Automated Tests)
+# Import skema database (jika ada file SQL)
+psql -U postgres -d dapur_ina_aina -f database/schema.sql
+```
+
+### 3. Menjalankan Aplikasi (Monorepo)
+
+#### Option A: Jalankan Semua (Backend + Frontend)
 ```bash
-# Menjalankan seluruh skenario pengujian E2E (17/17 PASS)
-node tests/e2e_flow_test.js
-node tests/e2e_advanced_test.js
+# Install dependencies untuk semua bagian
+npm run install:all
+
+# Jalankan backend dan frontend secara bersamaan
+npm run dev:all
+```
+
+#### Option B: Jalankan Terpisah
+```bash
+# Backend API (Express.js)
+cd backend
+npm install
+npm run dev
+# API berjalan di http://localhost:3001
+
+# Frontend SPA (React)
+cd frontend
+npm install
+npm run dev
+# Frontend berjalan di http://localhost:5173
+```
+
+### 4. Akses Aplikasi
+- **Frontend SPA**: http://localhost:5173
+- **Backend API**: http://localhost:3001
+- **API Documentation**: http://localhost:3001/api/v1/docs (jika tersedia)
+
+### 5. Menjalankan Uji Otomatis
+```bash
+# Jalankan test suite untuk backend
+cd backend
+npm test
+
+# Jalankan E2E test (jika tersedia)
+node tests/e2e_flow.test.js
 ```
 
 ---
-*Dokumentasi ini digenerate secara otomatis untuk proyek Dapur Ina Aina.*
+
+## 10. Fitur Terbaru & Status Perkembangan
+
+### ✅ Sudah Diimplementasikan:
+1. **Migrasi ke Monorepo** - React SPA + Express API terpisah
+2. **JWT Authentication** - Modern token-based authentication
+3. **React Router v6** - Client-side routing dengan lazy loading
+4. **Tailwind CSS** - Utility-first styling system
+5. **React Context API** - State management untuk auth & cart
+6. **Excel Report** - Admin-only sales report dengan date range
+7. **Responsive Design** - Mobile-first responsive layout
+
+### 🔄 Dalam Pengembangan:
+1. **TypeScript Migration** - Migrasi dari JSX ke TypeScript
+2. **WebSocket Integration** - Real-time order notifications
+3. **PWA Support** - Installable web app untuk tablet/kasir
+4. **Redis Caching** - Caching untuk performance improvement
+5. **Docker Deployment** - Containerized deployment
+
+### 📋 Kompatibilitas Browser:
+- Chrome 90+ (rekomendasi)
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+---
+
+*Dokumentasi ini diperbarui terakhir: September 2026*
+*Versi Sistem: 2.0.0 (Monorepo Edition)*
+*Architecture: Modern SPA + REST API*
