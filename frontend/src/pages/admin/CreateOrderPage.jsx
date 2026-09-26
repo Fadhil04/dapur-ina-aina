@@ -103,12 +103,13 @@ export default function CreateOrderPage() {
       setCustomerName('');
       setTableNumber('');
       setShowConfirm(false);
+      setLoading(false); // [FIX] reset loading setelah sukses
 
       // Invalidate orders cache
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['order-counts'] });
 
-      // Reset success setelah 3 detik
+      // Reset success setelah 3 detik — user bisa buat pesanan baru
       setTimeout(() => {
         setSuccess(null);
       }, 3000);

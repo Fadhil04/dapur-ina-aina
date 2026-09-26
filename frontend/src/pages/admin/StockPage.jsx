@@ -6,7 +6,7 @@ import { stockService } from '../../services/stockService'
 import { menuService } from '../../services/menuService'
 import { formatRupiah } from '../../utils/format'
 
-import { Plus, Edit2, ArrowUpDown, History, Trash2, Package } from 'lucide-react'
+import { Plus, Edit2, ArrowUpDown, History, Trash2, Package, ToggleLeft } from 'lucide-react'
 
 function MenuModal({ menu, categories, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -180,6 +180,20 @@ export default function StockPage() {
     }
   }
 
+  const handleActivate = async (item) => {
+    const confirmed = window.confirm(
+      `Aktifkan kembali menu "${item.name_menu}"?\n\nMenu akan kembali tampil di katalog pelanggan.`
+    )
+    if (!confirmed) return
+    try {
+      await menuService.activate(item.id_menu_item)
+      qc.invalidateQueries({ queryKey: ['stock'] })
+      qc.invalidateQueries({ queryKey: ['menu'] })
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal mengaktifkan menu.')
+    }
+  }
+
   return (
     <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl flex flex-col gap-space-lg">
       <div className="flex items-center justify-between">
@@ -210,7 +224,13 @@ export default function StockPage() {
             </thead>
             <tbody className="divide-y divide-outline-variant">
               {items.map(item => (
-                <tr key={item.id_menu_item} className={`hover:bg-surface-container-low/60 transition-colors ${item.stock <= 5 ? 'bg-error-container/20' : ''}`}>
+                <tr key={item.id_menu_item} className={`hover:bg-surface-container-low/60 transition-colors ${
+                  !item.is_active
+                    ? 'opacity-50 bg-surface-container-high/40'
+                    : item.stock <= 5
+                    ? 'bg-error-container/20'
+                    : ''
+                }`}>
                   <td className="px-4 py-3">
                     {item.image_url ? (
                       <img src={item.image_url} alt={item.name_menu} className="w-12 h-12 rounded-lg object-cover" />
@@ -220,28 +240,68 @@ export default function StockPage() {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 font-label-lg text-on-surface">{item.name_menu}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`font-label-lg text-on-surface ${!item.is_active ? 'line-through text-on-surface-variant' : ''}`}>
+                        {item.name_menu}
+                      </span>
+                      {!item.is_active && (
+                        <span className="inline-flex items-center gap-1 bg-error-container text-error text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">
+                          Nonaktif
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-on-surface-variant">{item.name_category}</td>
                   <td className="px-4 py-3 text-right text-on-surface">{formatRupiah(item.price)}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`font-bold ${item.stock <= 5 ? 'text-error' : 'text-on-surface'}`}>{item.stock}</span>
-                    {item.stock <= 5 && <span className="ml-1 font-label-md text-label-md text-error">⚠</span>}
+                    <span className={`font-bold ${item.stock <= 5 && item.is_active ? 'text-error' : 'text-on-surface'}`}>{item.stock}</span>
+                    {item.stock <= 5 && item.is_active && <span className="ml-1 font-label-md text-label-md text-error">⚠</span>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => setMenuModal(item)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors" title="Edit">
+                      {/* Tombol edit & mutasi di-disable untuk item nonaktif */}
+                      <button
+                        onClick={() => item.is_active && setMenuModal(item)}
+                        disabled={!item.is_active}
+                        className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={item.is_active ? 'Edit' : 'Menu sudah dinonaktifkan'}
+                      >
                         <Edit2 size={14} />
                       </button>
-                      <button onClick={() => setAdjustModal(item)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors" title="Mutasi Stok">
+                      <button
+                        onClick={() => item.is_active && setAdjustModal(item)}
+                        disabled={!item.is_active}
+                        className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={item.is_active ? 'Mutasi Stok' : 'Menu sudah dinonaktifkan'}
+                      >
                         <ArrowUpDown size={14} />
                       </button>
-                      <button onClick={() => navigate(`/stock/${item.id_menu_item}/history`)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors" title="Histori">
+                      <button
+                        onClick={() => navigate(`/stock/${item.id_menu_item}/history`)}
+                        className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors"
+                        title="Histori"
+                      >
                         <History size={14} />
                       </button>
-                      <button onClick={() => handleDelete(item)} className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-colors" title="Nonaktifkan Menu">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                      {/* Tombol nonaktifkan (aktif) / aktifkan kembali (nonaktif) */}
+                      {item.is_active ? (
+                        <button
+                          onClick={() => handleDelete(item)}
+                          className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-colors"
+                          title="Nonaktifkan Menu"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleActivate(item)}
+                          className="p-1.5 text-on-surface-variant hover:text-tertiary hover:bg-tertiary-container rounded-lg transition-colors"
+                          title="Aktifkan Kembali"
+                        >
+                          <ToggleLeft size={14} />
+                        </button>
+                      )}                    </div>
                   </td>
                 </tr>
               ))}

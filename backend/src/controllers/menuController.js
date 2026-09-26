@@ -96,7 +96,21 @@ exports.deactivateMenu = async (req, res, next) => {
 
     const menu = await MenuItem.findById(id);
     if (!menu) return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
+    if (!menu.is_active) return res.status(400).json({ success: false, message: 'Menu sudah dalam kondisi nonaktif' });
     await MenuItem.deactivate(id);
     res.json({ success: true, message: 'Menu berhasil dinonaktifkan' });
+  } catch (err) { next(err); }
+};
+
+exports.activateMenu = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID menu tidak valid' });
+
+    const menu = await MenuItem.findById(id);
+    if (!menu) return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
+    if (menu.is_active) return res.status(400).json({ success: false, message: 'Menu sudah dalam kondisi aktif' });
+    const updated = await MenuItem.activate(id);
+    res.json({ success: true, message: 'Menu berhasil diaktifkan kembali', data: updated });
   } catch (err) { next(err); }
 };

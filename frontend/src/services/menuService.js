@@ -8,4 +8,5 @@ export const menuService = {
   create: (payload)     => api.post('/menu', payload).then(r => r.data),
   update: (id, payload) => api.put(`/menu/${id}`, payload).then(r => r.data),
   deactivate: (id)      => api.delete(`/menu/${id}`).then(r => r.data),
+  activate: (id)        => api.patch(`/menu/${id}/activate`).then(r => r.data),
 }

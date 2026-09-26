@@ -11,8 +11,9 @@ router.get('/categories', menuController.getCategories);
 router.get('/:id',        menuController.getById);
 
 // Admin-only routes
-router.post('/',      verifyToken, requireRole('admin'), validate(menuController.createMenuSchema), menuController.createMenu);
-router.put('/:id',    verifyToken, requireRole('admin'), validate(menuController.updateMenuSchema), menuController.updateMenu);
-router.delete('/:id', verifyToken, requireRole('admin'), menuController.deactivateMenu);
+router.post('/',              verifyToken, requireRole('admin'), validate(menuController.createMenuSchema), menuController.createMenu);
+router.put('/:id',            verifyToken, requireRole('admin'), validate(menuController.updateMenuSchema), menuController.updateMenu);
+router.delete('/:id',         verifyToken, requireRole('admin'), menuController.deactivateMenu);
+router.patch('/:id/activate', verifyToken, requireRole('admin'), menuController.activateMenu);
 
 module.exports = router;

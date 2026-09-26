@@ -72,6 +72,16 @@ const MenuItem = {
     return rows[0];
   },
 
+  // Aktifkan kembali menu yang sudah dinonaktifkan
+  async activate(id) {
+    const { rows } = await pool.query(
+      `UPDATE menu_item SET is_active = true, updated_at = NOW()
+       WHERE id_menu_item = $1 RETURNING *`,
+      [id]
+    );
+    return rows[0];
+  },
+
   // Update stok absolut (dipakai controller setelah hitung stok baru)
   async updateStock(id, newStock, client = pool) {
     const { rows } = await client.query(
