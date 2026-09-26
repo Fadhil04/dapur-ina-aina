@@ -124,7 +124,7 @@ exports.downloadExcelReport = async (req, res) => {
         order.table_number === 'TAKEAWAY' ? 'Take Away' : `Meja ${order.table_number}`,
         itemsText,
         formatPaymentMethod(order.payment_method, order.card_type),
-        order.total_amount
+        parseFloat(order.total_amount)
       ]);
 
       row.alignment = { vertical: 'top', wrapText: true };
@@ -141,7 +141,7 @@ exports.downloadExcelReport = async (req, res) => {
         }
       });
 
-      grandTotal += order.total_amount;
+      grandTotal += parseFloat(order.total_amount);
     });
 
     // Grand total row
