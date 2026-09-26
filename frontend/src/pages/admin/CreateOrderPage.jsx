@@ -6,9 +6,7 @@ import { Button, Card, Modal, Toast, SearchInput, LoadingCardSkeleton, EmptyStat
 import { Plus, Minus, Trash2, ShoppingCart, CheckCircle } from 'lucide-react';
 import CategoryPills from '../../components/customer/CategoryPills';
 
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
+import { formatRupiah } from '../../utils/format';
 
 export default function CreateOrderPage() {
   const qc = useQueryClient();

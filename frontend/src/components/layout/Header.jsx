@@ -20,8 +20,8 @@ export function Header() {
 
   const navLinkClass = ({ isActive }) =>
     isActive
-      ? 'bg-primary text-on-primary px-4 py-2 rounded-xl font-label-lg text-label-lg transition-all'
-      : 'text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors';
+      ? 'bg-primary text-on-primary px-4 py-2 rounded-xl font-label-lg text-label-lg shadow-sm font-semibold transition-all'
+      : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60 px-4 py-2 rounded-xl font-label-lg text-label-lg transition-all';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-20 bg-surface/90 backdrop-blur-xl shadow-[0_2px_12px_rgba(36,28,26,0.06)]">
@@ -58,14 +58,14 @@ export function Header() {
 
           {user?.role === 'admin' && (
             <>
-              <NavLink to="/orders" className={navLinkClass}>
-                📋 Pesanan
-              </NavLink>
               <NavLink to="/dashboard" className={navLinkClass}>
                 📊 Dashboard
               </NavLink>
               <NavLink to="/stock" className={navLinkClass}>
                 📦 Stok
+              </NavLink>
+              <NavLink to="/orders" className={navLinkClass}>
+                📜 Riwayat Pesanan
               </NavLink>
             </>
           )}
@@ -103,7 +103,7 @@ export function Header() {
           ) : (
             <>
               <div className="hidden sm:flex items-center gap-space-sm text-label-lg">
-                <span className="text-on-surface-variant">{user.name}</span>
+                <span className="text-on-surface-variant">{user.name_user}</span>
                 <span className="text-on-surface-variant">•</span>
                 <span className="text-on-surface font-bold">
                   {user.role === 'cashier' ? '💳 Kasir' : '👑 Admin'}
@@ -137,13 +137,7 @@ export function Header() {
                 <NavLink
                   to="/menu"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-space-lg py-space-md rounded-xl font-label-lg text-label-lg transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
-                    }`
-                  }
+                  className={navLinkClass}
                 >
                   Menu
                 </NavLink>
@@ -152,7 +146,7 @@ export function Header() {
                     navigate('/login');
                     setMobileMenuOpen(false);
                   }}
-                  className="px-space-lg py-space-md rounded-xl font-label-lg text-label-lg bg-primary text-on-primary hover:bg-primary-container transition-all w-full text-left"
+                  className="px-4 py-2.5 rounded-xl font-label-lg text-label-lg bg-primary text-on-primary hover:bg-primary-container shadow-sm transition-all w-full text-left"
                 >
                   Login
                 </button>
@@ -164,26 +158,14 @@ export function Header() {
                 <NavLink
                   to="/orders"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-space-lg py-space-md rounded-xl font-label-lg text-label-lg transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
-                    }`
-                  }
+                  className={navLinkClass}
                 >
                   📋 Pesanan
                 </NavLink>
                 <NavLink
                   to="/orders/create"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-space-lg py-space-md rounded-xl font-label-lg text-label-lg transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
-                    }`
-                  }
+                  className={navLinkClass}
                 >
                   ➕ Buat Pesanan
                 </NavLink>
@@ -193,43 +175,25 @@ export function Header() {
             {user?.role === 'admin' && (
               <>
                 <NavLink
-                  to="/orders"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-space-lg py-space-md rounded-xl font-label-lg text-label-lg transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
-                    }`
-                  }
-                >
-                  📋 Pesanan
-                </NavLink>
-                <NavLink
                   to="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-space-lg py-space-md rounded-xl font-label-lg text-label-lg transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
-                    }`
-                  }
+                  className={navLinkClass}
                 >
                   📊 Dashboard
                 </NavLink>
                 <NavLink
                   to="/stock"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-space-lg py-space-md rounded-xl font-label-lg text-label-lg transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
-                    }`
-                  }
+                  className={navLinkClass}
                 >
                   📦 Stok
+                </NavLink>
+                <NavLink
+                  to="/orders"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={navLinkClass}
+                >
+                  📜 Riwayat Pesanan
                 </NavLink>
               </>
             )}
@@ -238,30 +202,56 @@ export function Header() {
       )}
       
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Confirmation Modal — Desain Dialog Nyaman & Modern */}
       <Modal
         isOpen={showLogoutConfirm}
-        title="Konfirmasi Logout"
         onClose={() => setShowLogoutConfirm(false)}
+        maxWidth="max-w-md"
+        showCloseButton={true}
       >
-        <div className="space-y-space-lg">
-          <p className="font-body-md text-body-md text-on-surface">
-            Yakin ingin keluar dari sistem?
-          </p>
-          <div className="flex gap-space-md">
+        <div className="text-center pt-space-xs pb-space-sm space-y-space-md">
+          {/* Icon Badge */}
+          <div className="w-16 h-16 mx-auto bg-error-container/40 text-error rounded-2xl flex items-center justify-center ring-8 ring-error-container/20 shadow-sm transition-transform hover:scale-105">
+            <LogOut size={28} className="translate-x-0.5" />
+          </div>
+
+          {/* Title & Description */}
+          <div>
+            <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Konfirmasi Keluar
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-space-xs leading-relaxed">
+              Apakah Anda yakin ingin keluar dari sistem? Sesi login Anda akan diakhiri.
+            </p>
+          </div>
+
+          {/* User Account Info Chip */}
+          {user && (
+            <div className="bg-surface-container/70 rounded-xl px-space-md py-space-sm flex items-center justify-between text-body-sm font-body-sm border border-outline-variant/40">
+              <span className="text-on-surface-variant">Akun saat ini:</span>
+              <span className="font-semibold text-on-surface flex items-center gap-space-xs">
+                <span className="w-2 h-2 rounded-full bg-secondary inline-block" />
+                {user.name_user} ({user.role === 'cashier' ? 'Kasir' : 'Admin'})
+              </span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-space-md pt-space-sm">
             <Button
               variant="neutral"
               onClick={() => setShowLogoutConfirm(false)}
-              className="flex-1"
+              className="flex-1 py-space-md"
             >
               Batal
             </Button>
             <Button
-              variant="primary"
+              variant="danger"
+              icon={LogOut}
               onClick={handleLogoutConfirm}
-              className="flex-1"
+              className="flex-1 py-space-md"
             >
-              Logout
+              Ya, Keluar
             </Button>
           </div>
         </div>

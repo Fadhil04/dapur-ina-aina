@@ -4,12 +4,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { stockService } from '../../services/stockService'
 import { menuService } from '../../services/menuService'
+import { formatRupiah } from '../../utils/format'
 
-import { Plus, Edit2, ArrowUpDown, History } from 'lucide-react'
-
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n)
-}
+import { Plus, Edit2, ArrowUpDown, History, Trash2 } from 'lucide-react'
 
 function MenuModal({ menu, categories, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -38,38 +35,38 @@ function MenuModal({ menu, categories, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <h2 className="font-bold text-gray-800 mb-4">{menu ? 'Edit Menu' : 'Tambah Menu Baru'}</h2>
+      <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-md p-6">
+        <h2 className="font-label-lg text-label-lg text-on-surface mb-4">{menu ? 'Edit Menu' : 'Tambah Menu Baru'}</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-xs text-gray-500">Nama Menu</label>
+            <label className="font-label-md text-label-md text-on-surface-variant">Nama Menu</label>
             <input value={form.name_menu} onChange={e => setForm(f=>({...f,name_menu:e.target.value}))}
-              className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+              className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" required />
           </div>
           <div>
-            <label className="text-xs text-gray-500">Kategori</label>
+            <label className="font-label-md text-label-md text-on-surface-variant">Kategori</label>
             <select value={form.id_category} onChange={e => setForm(f=>({...f,id_category:e.target.value}))}
-              className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" required>
+              className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" required>
               <option value="">Pilih kategori</option>
               {categories.map(c => <option key={c.id_category} value={c.id_category}>{c.name_category}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500">Harga (Rp)</label>
+            <label className="font-label-md text-label-md text-on-surface-variant">Harga (Rp)</label>
             <input type="number" value={form.price} onChange={e => setForm(f=>({...f,price:e.target.value}))}
-              className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" required min="0" />
+              className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" required min="0" />
           </div>
           {!menu && (
             <div>
-              <label className="text-xs text-gray-500">Stok Awal</label>
+              <label className="font-label-md text-label-md text-on-surface-variant">Stok Awal</label>
               <input type="number" value={form.stock} onChange={e => setForm(f=>({...f,stock:e.target.value}))}
-                className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" min="0" />
+                className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" min="0" />
             </div>
           )}
-          {error && <p className="text-red-500 text-xs bg-red-50 p-2 rounded-lg">{error}</p>}
+          {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg">{error}</p>}
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 border border-gray-200 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-50">Batal</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-medium disabled:opacity-60">
+            <button type="button" onClick={onClose} className="flex-1 border border-outline-variant py-2 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low">Batal</button>
+            <button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 rounded-xl font-label-lg text-label-lg disabled:opacity-60">
               {loading ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>
@@ -100,34 +97,34 @@ function AdjustModal({ menu, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-        <h2 className="font-bold text-gray-800 mb-1">Mutasi Stok</h2>
-        <p className="text-sm text-gray-500 mb-4">{menu.name_menu} · Stok saat ini: <b>{menu.stock}</b></p>
+      <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <h2 className="font-label-lg text-label-lg text-on-surface mb-1">Mutasi Stok</h2>
+        <p className="font-body-md text-body-md text-on-surface-variant mb-4">{menu.name_menu} · Stok saat ini: <b>{menu.stock}</b></p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-xs text-gray-500">Tipe</label>
+            <label className="font-label-md text-label-md text-on-surface-variant">Tipe</label>
             <div className="flex gap-2 mt-1">
               {['TAMBAH','RUSAK'].map(t => (
                 <button key={t} type="button" onClick={() => setForm(f=>({...f,type:t}))}
-                  className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${form.type===t?'bg-orange-500 text-white border-orange-500':'border-gray-200 text-gray-600'}`}
+                  className={`flex-1 py-2 rounded-xl font-label-lg text-label-lg border transition-colors ${form.type===t?'bg-primary text-on-primary border-primary':'border-outline-variant text-on-surface-variant'}`}
                 >{t}</button>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-xs text-gray-500">Jumlah</label>
+            <label className="font-label-md text-label-md text-on-surface-variant">Jumlah</label>
             <input type="number" value={form.quantity} onChange={e => setForm(f=>({...f,quantity:e.target.value}))}
-              className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" required min="1" />
+              className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" required min="1" />
           </div>
           <div>
-            <label className="text-xs text-gray-500">Catatan</label>
+            <label className="font-label-md text-label-md text-on-surface-variant">Catatan</label>
             <input value={form.note} onChange={e => setForm(f=>({...f,note:e.target.value}))}
-              className="w-full mt-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" required />
+              className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" required />
           </div>
-          {error && <p className="text-red-500 text-xs bg-red-50 p-2 rounded-lg">{error}</p>}
+          {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg">{error}</p>}
           <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 border border-gray-200 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-50">Batal</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-medium disabled:opacity-60">
+            <button type="button" onClick={onClose} className="flex-1 border border-outline-variant py-2 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low">Batal</button>
+            <button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 rounded-xl font-label-lg text-label-lg disabled:opacity-60">
               {loading ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>
@@ -162,6 +159,20 @@ export default function StockPage() {
     setAdjustModal(null)
   }
 
+  const handleDelete = async (item) => {
+    const confirmed = window.confirm(
+      `Nonaktifkan menu "${item.name_menu}"?\n\nMenu yang dinonaktifkan tidak akan tampil di katalog pelanggan.`
+    )
+    if (!confirmed) return
+    try {
+      await menuService.deactivate(item.id_menu_item)
+      qc.invalidateQueries({ queryKey: ['stock'] })
+      qc.invalidateQueries({ queryKey: ['menu'] })
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal menonaktifkan menu.')
+    }
+  }
+
   return (
     <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl flex flex-col gap-space-lg">
       <div className="flex items-center justify-between">
@@ -179,9 +190,9 @@ export default function StockPage() {
         {isLoading ? (
           <div className="py-space-2xl text-center text-on-surface-variant font-body-md text-body-md">Memuat stok...</div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full font-body-md text-body-md">
             <thead>
-              <tr className="bg-gray-50 text-xs text-gray-500 uppercase">
+              <tr className="bg-surface-container-high/60 text-on-surface-variant font-label-md text-label-md uppercase tracking-wider border-b border-outline-variant">
                 <th className="text-left px-4 py-3">Menu</th>
                 <th className="text-left px-4 py-3">Kategori</th>
                 <th className="text-right px-4 py-3">Harga</th>
@@ -189,26 +200,29 @@ export default function StockPage() {
                 <th className="text-center px-4 py-3">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-outline-variant">
               {items.map(item => (
-                <tr key={item.id_menu_item} className={`bg-white hover:bg-gray-50 transition-colors ${item.stock <= 5 ? 'bg-red-50 hover:bg-red-50' : ''}`}>
-                  <td className="px-4 py-3 font-medium text-gray-800">{item.name_menu}</td>
-                  <td className="px-4 py-3 text-gray-500">{item.name_category}</td>
-                  <td className="px-4 py-3 text-right">{formatRupiah(item.price)}</td>
+                <tr key={item.id_menu_item} className={`hover:bg-surface-container-low/60 transition-colors ${item.stock <= 5 ? 'bg-error-container/20' : ''}`}>
+                  <td className="px-4 py-3 font-label-lg text-on-surface">{item.name_menu}</td>
+                  <td className="px-4 py-3 text-on-surface-variant">{item.name_category}</td>
+                  <td className="px-4 py-3 text-right text-on-surface">{formatRupiah(item.price)}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`font-bold ${item.stock <= 5 ? 'text-red-500' : 'text-gray-800'}`}>{item.stock}</span>
-                    {item.stock <= 5 && <span className="ml-1 text-xs text-red-400">⚠</span>}
+                    <span className={`font-bold ${item.stock <= 5 ? 'text-error' : 'text-on-surface'}`}>{item.stock}</span>
+                    {item.stock <= 5 && <span className="ml-1 font-label-md text-label-md text-error">⚠</span>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => setMenuModal(item)} className="p-1.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors" title="Edit">
+                      <button onClick={() => setMenuModal(item)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors" title="Edit">
                         <Edit2 size={14} />
                       </button>
-                      <button onClick={() => setAdjustModal(item)} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Mutasi Stok">
+                      <button onClick={() => setAdjustModal(item)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors" title="Mutasi Stok">
                         <ArrowUpDown size={14} />
                       </button>
-                      <button onClick={() => navigate(`/stock/${item.id_menu_item}/history`)} className="p-1.5 text-gray-400 hover:text-purple-500 hover:bg-purple-50 rounded-lg transition-colors" title="Histori">
+                      <button onClick={() => navigate(`/stock/${item.id_menu_item}/history`)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-container rounded-lg transition-colors" title="Histori">
                         <History size={14} />
+                      </button>
+                      <button onClick={() => handleDelete(item)} className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-colors" title="Nonaktifkan Menu">
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>

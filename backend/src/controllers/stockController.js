@@ -65,9 +65,12 @@ exports.adjustStock = async (req, res, next) => {
 
 exports.getStockHistory = async (req, res, next) => {
   try {
-    const menu = await MenuItem.findById(req.params.id);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID menu tidak valid' });
+
+    const menu = await MenuItem.findById(id);
     if (!menu) return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
-    const movements = await StockMovement.findByMenuItem(req.params.id);
+    const movements = await StockMovement.findByMenuItem(id);
     res.json({ success: true, data: { menu, movements } });
   } catch (err) { next(err); }
 };

@@ -10,6 +10,7 @@ const checkoutSchema = z.object({
   items: z.array(z.object({
     id_menu_item: z.coerce.number().int().positive(),
     quantity:     z.coerce.number().int().positive('Jumlah harus lebih dari 0'),
+    notes:        z.string().optional().nullable(),
   })).min(1, 'Keranjang tidak boleh kosong'),
 });
 
@@ -29,7 +30,7 @@ exports.checkout = async (req, res, next) => {
     const enrichedItems = [];
     for (let i = 0; i < items.length; i++) {
       const menu = menuResults[i];
-      const { id_menu_item, quantity } = items[i];
+      const { id_menu_item, quantity, notes } = items[i];
 
       if (!menu) {
         return res.status(400).json({
@@ -56,6 +57,7 @@ exports.checkout = async (req, res, next) => {
         name_menu: menu.name_menu,
         price:     menu.price,
         quantity,
+        notes:     notes || null,
       });
     }
 
@@ -83,11 +85,12 @@ exports.checkout = async (req, res, next) => {
 
 exports.listOrders = async (req, res, next) => {
   try {
-    const { status, page = 1, limit = 15 } = req.query;
+    const { status, page = 1, limit = 15, search } = req.query;
     const result = await Order.findAll({
       status: status && status !== 'ALL' ? status : undefined,
       page:   parseInt(page),
       limit:  parseInt(limit),
+      search: search || undefined,
     });
     res.json({ success: true, data: result });
   } catch (err) { next(err); }

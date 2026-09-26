@@ -19,14 +19,26 @@ const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 function ProtectedRoute({ children, role }) {
   const { isAuthenticated, user } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (role && user?.role !== role) return <Navigate to="/orders" replace />;
+  if (role && user?.role !== role) {
+    return <Navigate to={user?.role === 'admin' ? '/dashboard' : '/orders'} replace />;
+  }
   return children;
 }
 
 function LoginRedirect({ children }) {
-  const { isAuthenticated } = useAuth();
-  if (isAuthenticated) return <Navigate to="/orders" replace />;
+  const { isAuthenticated, user } = useAuth();
+  if (isAuthenticated) {
+    return <Navigate to={user?.role === 'admin' ? '/dashboard' : '/orders'} replace />;
+  }
   return children;
+}
+
+function RootRedirect() {
+  const { isAuthenticated, user } = useAuth();
+  if (isAuthenticated) {
+    return <Navigate to={user?.role === 'admin' ? '/dashboard' : '/orders'} replace />;
+  }
+  return <Navigate to="/menu" replace />;
 }
 
 function Loader() {
@@ -111,8 +123,11 @@ export default function App() {
                 }
               />
 
+              {/* Admin alias */}
+              <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+
               {/* Default redirect */}
-              <Route path="/" element={<Navigate to="/menu" replace />} />
+              <Route path="/" element={<RootRedirect />} />
               <Route path="*" element={<Navigate to="/menu" replace />} />
             </Routes>
           </Suspense>

@@ -9,9 +9,7 @@ import { useState } from 'react';
 import api from '../../services/api';
 import { Toast } from '../../components/ui/Toast';
 
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
+import { formatRupiah } from '../../utils/format';
 
 function getTodayDate() {
   const today = new Date();

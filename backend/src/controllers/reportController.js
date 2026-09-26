@@ -18,6 +18,14 @@ exports.downloadExcelReport = async (req, res) => {
       });
     }
 
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date_start) || !dateRegex.test(date_end) || isNaN(Date.parse(date_start)) || isNaN(Date.parse(date_end))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format tanggal tidak valid. Gunakan format YYYY-MM-DD',
+      });
+    }
+
     // Query transaksi LUNAS dalam rentang tanggal
     const query = `
       SELECT 
@@ -103,7 +111,8 @@ exports.downloadExcelReport = async (req, res) => {
     let grandTotal = 0;
 
     result.rows.forEach((order) => {
-      const itemsText = order.items
+      const itemsList = Array.isArray(order.items) ? order.items.filter(item => item && item.menu_name) : [];
+      const itemsText = itemsList
         .map(item => `${item.quantity}x ${item.menu_name} (@${formatRupiah(item.price)})`)
         .join('\n');
 

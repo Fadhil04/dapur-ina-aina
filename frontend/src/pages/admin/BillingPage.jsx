@@ -3,18 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '../../services/orderService';
 import { calculateChange } from '../../utils/billing';
-import { CheckCircle, ArrowLeft, AlertCircle, Printer } from 'lucide-react';
+import { CheckCircle, ArrowLeft, AlertCircle, Printer, ShieldAlert } from 'lucide-react';
 import { Card, Button, Modal } from '../../components/ui';
 import { Toast } from '../../components/ui/Toast';
 import { Receipt } from '../../components/Receipt';
+import { useAuth } from '../../context/AuthContext';
 
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
-
-function formatDate(d) {
-  return new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-}
+import { formatRupiah, formatDate } from '../../utils/format';
 
 const PAYMENT_METHODS = [
   { id: 'TUNAI', label: '💵 Tunai' },
@@ -27,6 +22,8 @@ export default function BillingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ['order', id],
@@ -107,21 +104,45 @@ export default function BillingPage() {
 
   const isLunas = order.status === 'LUNAS' || successData;
 
+  const handlePrintReceipt = () => {
+    document.body.classList.add('has-print-receipt');
+    window.print();
+    setTimeout(() => {
+      document.body.classList.remove('has-print-receipt');
+    }, 1000);
+  };
+
   return (
     <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl">
       <div className="max-w-2xl">
         <button
           onClick={() => navigate('/orders')}
-          className="flex items-center gap-space-md text-label-lg text-on-surface-variant hover:text-on-surface mb-space-lg transition-colors"
+          className="flex items-center gap-space-md text-label-lg text-on-surface-variant hover:text-on-surface mb-space-lg transition-colors print:hidden"
         >
-          <ArrowLeft size={18} /> Kembali ke Pesanan
+          <ArrowLeft size={18} /> Kembali ke {isAdmin ? 'Riwayat Pesanan' : 'Pesanan'}
         </button>
 
-        {/* Struk — hanya tampil setelah bayar sukses */}
-        {successData && <Receipt order={order} payment={successData} />}
+        {/* Struk — tampil jika lunas */}
+        {isLunas && <Receipt order={order} payment={order.payment || successData} />}
 
-        {/* Form pembayaran — hanya jika belum LUNAS */}
-        {!isLunas && (
+        {/* Jika belum lunas dan yang akses adalah Admin: Admin tidak mengurus transaksi */}
+        {!isLunas && isAdmin && (
+          <Card className="p-space-xl text-center bg-surface-container-low border border-outline-variant">
+            <ShieldAlert size={48} className="mx-auto text-tertiary mb-space-md" />
+            <h3 className="font-headline-sm text-headline-sm text-on-surface mb-space-sm">
+              Pesanan Belum Selesai (Pending)
+            </h3>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mb-space-lg">
+              Pesanan ini belum dibayar. Sebagai admin, Anda hanya melihat riwayat transaksi yang telah lunas. Proses dan transaksi pembayaran dikelola oleh kasir.
+            </p>
+            <Button variant="primary" onClick={() => navigate('/orders')}>
+              Kembali ke Riwayat Pesanan
+            </Button>
+          </Card>
+        )}
+
+        {/* Form pembayaran — hanya untuk Kasir jika belum LUNAS */}
+        {!isLunas && !isAdmin && (
           <Card className="p-space-lg">
             <h3 className="font-title-lg text-title-lg text-on-surface mb-space-lg">Proses Pembayaran</h3>
 
@@ -200,19 +221,17 @@ export default function BillingPage() {
         )}
 
         {/* Panel sukses setelah bayar */}
-        {isLunas && (
-          <Card className="p-space-lg text-center bg-secondary-container border-2 border-secondary">
+        {isLunas && successData && (
+          <Card className="p-space-lg text-center bg-secondary-container border-2 border-secondary mt-space-lg print:hidden">
             <CheckCircle className="mx-auto text-secondary mb-space-lg" size={48} />
             <p className="font-headline-md text-headline-md text-on-secondary-container mb-space-md">Pembayaran Berhasil!</p>
-            {successData && (
-              <p className="text-body-md text-on-secondary-container-variant mb-space-lg">
-                Invoice: <span className="font-mono font-bold text-on-secondary-container">{successData.invoice_number}</span>
-              </p>
-            )}
+            <p className="text-body-md text-on-secondary-container-variant mb-space-lg">
+              Invoice: <span className="font-mono font-bold text-on-secondary-container">{successData.invoice_number}</span>
+            </p>
             <div className="flex gap-space-md justify-center flex-wrap">
               <Button
                 variant="neutral"
-                onClick={() => window.print()}
+                onClick={handlePrintReceipt}
                 className="gap-space-sm"
               >
                 <Printer size={18} /> Cetak Struk
@@ -221,7 +240,7 @@ export default function BillingPage() {
                 variant="primary"
                 onClick={() => navigate('/orders')}
               >
-                Pesanan Berikutnya
+                {isAdmin ? 'Kembali ke Riwayat Pesanan' : 'Pesanan Berikutnya'}
               </Button>
             </div>
           </Card>

@@ -1,16 +1,26 @@
 import { useNavigate } from 'react-router-dom';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, FileText } from 'lucide-react';
 import { Badge, Button, EmptyState } from '../ui';
+import { useAuth } from '../../context/AuthContext';
 
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
+import { formatRupiah } from '../../utils/format';
 
 export default function OrderTable({ orders }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isCashier = user?.role === 'cashier';
   
   if (!orders?.length) {
-    return <EmptyState title="Tidak Ada Pesanan" description="Belum ada pesanan masuk dari pelanggan." />;
+    return (
+      <EmptyState
+        title={isCashier ? 'Tidak Ada Pesanan' : 'Tidak Ada Riwayat Transaksi'}
+        description={
+          isCashier
+            ? 'Belum ada pesanan masuk dari pelanggan.'
+            : 'Belum ada transaksi selesai yang tercatat.'
+        }
+      />
+    );
   }
 
   return (
@@ -46,7 +56,7 @@ export default function OrderTable({ orders }) {
               </td>
               <td className="px-space-lg py-space-md font-currency-md text-currency-md text-right text-on-surface">{formatRupiah(order.total_amount)}</td>
               <td className="px-space-lg py-space-md text-center">
-                {order.status === 'PENDING' ? (
+                {isCashier && order.status === 'PENDING' ? (
                   <Button
                     variant="primary"
                     icon={CreditCard}

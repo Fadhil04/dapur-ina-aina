@@ -4,16 +4,14 @@ import { useCart } from '../../context/CartContext';
 import { orderService } from '../../services/orderService';
 import { Trash2, Plus, Minus, CheckCircle } from 'lucide-react';
 import { Button, Card, EmptyState, Toast } from '../../components/ui';
-
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
+import { formatRupiah } from '../../utils/format';
 
 export default function CartPage() {
   const { cart, removeItem, updateQuantity, clearCart, totalPrice } = useCart();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ customer_name: '', table_number: '' });
+  const [orderType, setOrderType] = useState('DINE_IN'); // DINE_IN atau TAKEAWAY
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -27,8 +25,12 @@ export default function CartPage() {
   const handleCheckout = async (e) => {
     e.preventDefault();
     setError(null);
-    if (!form.customer_name.trim() || !form.table_number.trim()) {
-      setError('Nama dan nomor meja wajib diisi.');
+    if (!form.customer_name.trim()) {
+      setError('Nama wajib diisi.');
+      return;
+    }
+    if (orderType === 'DINE_IN' && !form.table_number.trim()) {
+      setError('Nomor meja wajib diisi untuk Dine In.');
       return;
     }
     if (cart.length === 0) {
@@ -39,7 +41,8 @@ export default function CartPage() {
     try {
       const payload = {
         customer_name: form.customer_name.trim(),
-        table_number: form.table_number.trim(),
+        table_number: orderType === 'DINE_IN' ? form.table_number.trim() : null,
+        order_type: orderType,
         items: cart.map((i) => ({ id_menu_item: i.id_menu_item, quantity: i.quantity })),
       };
       const res = await orderService.checkout(payload);
@@ -188,6 +191,35 @@ export default function CartPage() {
             </div>
 
             <form onSubmit={handleCheckout} className="space-y-space-lg">
+              {/* Order Type Toggle */}
+              <div>
+                <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">Jenis Pesanan</label>
+                <div className="flex gap-space-md">
+                  <button
+                    type="button"
+                    onClick={() => setOrderType('DINE_IN')}
+                    className={`flex-1 py-space-md rounded-xl font-label-md transition-all ${
+                      orderType === 'DINE_IN'
+                        ? 'bg-primary text-on-primary border-2 border-primary'
+                        : 'bg-surface-container text-on-surface-variant border-2 border-outline-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    Dine In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderType('TAKEAWAY')}
+                    className={`flex-1 py-space-md rounded-xl font-label-md transition-all ${
+                      orderType === 'TAKEAWAY'
+                        ? 'bg-primary text-on-primary border-2 border-primary'
+                        : 'bg-surface-container text-on-surface-variant border-2 border-outline-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    Takeaway
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">Nama Pemesan</label>
                 <input
@@ -199,16 +231,18 @@ export default function CartPage() {
                 />
               </div>
 
-              <div>
-                <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">Nomor Meja</label>
-                <input
-                  value={form.table_number}
-                  onChange={(e) => setForm((f) => ({ ...f, table_number: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-outline-variant rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
-                  placeholder="Contoh: Meja 5"
-                  required
-                />
-              </div>
+              {orderType === 'DINE_IN' && (
+                <div>
+                  <label className="font-label-lg text-label-lg text-on-surface block mb-space-sm">Nomor Meja</label>
+                  <input
+                    value={form.table_number}
+                    onChange={(e) => setForm((f) => ({ ...f, table_number: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-outline-variant rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all bg-surface-container-low"
+                    placeholder="Contoh: Meja 5"
+                    required={orderType === 'DINE_IN'}
+                  />
+                </div>
+              )}
 
               {error && (
                 <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-md rounded-xl border border-error">
@@ -231,9 +265,14 @@ export default function CartPage() {
                 type="submit"
                 variant="primary"
                 disabled={loading || cart.length === 0}
-                className="w-full"
+                className="w-full flex items-center justify-center gap-2"
               >
-                {loading ? 'Memproses...' : 'Pesan Sekarang'}
+                {loading ? (
+                  <>
+                    <span className="animate-spin">⟳</span>
+                    Memproses...
+                  </>
+                ) : 'Pesan Sekarang'}
               </Button>
 
               <Button
@@ -248,8 +287,6 @@ export default function CartPage() {
           </Card>
         </div>
       )}
-
-      {error && <Toast title="Error" message={error} type="error" onClose={() => setError(null)} duration={5000} />}
     </div>
   );
 }

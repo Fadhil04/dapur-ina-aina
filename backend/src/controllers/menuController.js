@@ -37,7 +37,10 @@ exports.getCategories = async (req, res, next) => {
 
 exports.getById = async (req, res, next) => {
   try {
-    const menu = await MenuItem.findById(req.params.id);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID menu tidak valid' });
+
+    const menu = await MenuItem.findById(id);
     if (!menu) return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
     res.json({ success: true, data: menu });
   } catch (err) { next(err); }
@@ -74,18 +77,24 @@ exports.createMenu = async (req, res, next) => {
 
 exports.updateMenu = async (req, res, next) => {
   try {
-    const menu = await MenuItem.findById(req.params.id);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID menu tidak valid' });
+
+    const menu = await MenuItem.findById(id);
     if (!menu) return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
-    const updated = await MenuItem.update(req.params.id, req.body);
+    const updated = await MenuItem.update(id, req.body);
     res.json({ success: true, message: 'Menu berhasil diperbarui', data: updated });
   } catch (err) { next(err); }
 };
 
 exports.deactivateMenu = async (req, res, next) => {
   try {
-    const menu = await MenuItem.findById(req.params.id);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID menu tidak valid' });
+
+    const menu = await MenuItem.findById(id);
     if (!menu) return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
-    await MenuItem.deactivate(req.params.id);
+    await MenuItem.deactivate(id);
     res.json({ success: true, message: 'Menu berhasil dinonaktifkan' });
   } catch (err) { next(err); }
 };

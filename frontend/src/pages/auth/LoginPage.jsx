@@ -26,7 +26,8 @@ export default function LoginPage() {
     try {
       const { data } = await api.post('/auth/login', form);
       login(data.data.token, data.data.user);
-      navigate('/orders');
+      const target = data.data.user.role === 'admin' ? '/dashboard' : '/orders';
+      navigate(target);
     } catch (err) {
       setError(err.response?.data?.message || 'Login gagal. Periksa username dan password.');
     } finally {
@@ -106,7 +107,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {error && <Toast title="Error" message={error} type="error" onClose={() => setError(null)} duration={5000} />}
     </div>
   );
 }

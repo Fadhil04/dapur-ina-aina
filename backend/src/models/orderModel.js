@@ -1,24 +1,33 @@
 // backend/src/models/orderModel.js
 const pool = require('../config/db');
+const crypto = require('crypto');
 
-// [BIZ-03 FIX] Generate invoice number yang unik: INV-YYYYMMDD-XXXXXX (random suffix)
+// [BIZ-03 FIX] Generate invoice number yang unik: INV-YYYYMMDD-XXXXXX (crypto-based)
 function generateInvoiceNumber() {
   const now    = new Date();
   const date   = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const suffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const suffix = crypto.randomBytes(3).toString('hex').toUpperCase();
   return `INV-${date}-${suffix}`;
 }
 
 const Order = {
-  // Ambil semua pesanan dengan filter status & pagination
-  async findAll({ status, page = 1, limit = 15 } = {}) {
-    const offset      = (page - 1) * limit;
+  // Ambil semua pesanan dengan filter status & pagination & search
+  async findAll({ status, page = 1, limit = 15, search } = {}) {
+    const safePage    = Math.max(1, parseInt(page) || 1);
+    const safeLimit   = Math.max(1, parseInt(limit) || 15);
+    const offset      = (safePage - 1) * safeLimit;
     const whereParams = [];
     let   whereClause = 'WHERE 1=1';
 
-    if (status) {
-      whereParams.push(status);
+    const VALID_STATUSES = ['PENDING', 'LUNAS', 'DIBATALKAN'];
+    if (status && VALID_STATUSES.includes(status.toUpperCase())) {
+      whereParams.push(status.toUpperCase());
       whereClause += ` AND o.status = $${whereParams.length}`;
+    }
+
+    if (search) {
+      whereParams.push(`%${search}%`);
+      whereClause += ` AND (o.customer_name ILIKE $${whereParams.length} OR o.invoice_number ILIKE $${whereParams.length})`;
     }
 
     const dataQuery = `
@@ -34,18 +43,18 @@ const Order = {
     const countQuery = `SELECT COUNT(*) FROM orders o ${whereClause}`;
 
     const [dataResult, countResult] = await Promise.all([
-      pool.query(dataQuery, [...whereParams, limit, offset]),
+      pool.query(dataQuery, [...whereParams, safeLimit, offset]),
       pool.query(countQuery, whereParams),
     ]);
 
     const total      = parseInt(countResult.rows[0].count);
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / safeLimit);
 
     return {
       orders: dataResult.rows,
       total,
-      page:       parseInt(page),
-      limit,
+      page:       safePage,
+      limit:      safeLimit,
       totalPages,
     };
   },
@@ -67,49 +76,89 @@ const Order = {
     };
   },
 
-  // Baca order biasa (tanpa lock)
+  // Baca order biasa (tanpa lock) - Optimized: single query dengan LATERAL JOIN
   async findById(id, client = pool) {
-    const orderResult = await client.query(
-      `SELECT o.*, u.name_user AS kasir
-       FROM orders o LEFT JOIN users u ON u.id_user = o.id_user
+    const { rows } = await client.query(
+      `SELECT 
+         o.*,
+         u.name_user AS kasir,
+         COALESCE(i.items, '[]'::json) AS items,
+         p.payment
+       FROM orders o 
+       LEFT JOIN users u ON u.id_user = o.id_user
+       LEFT JOIN LATERAL (
+         SELECT json_agg(json_build_object(
+           'id_order_item', oi.id_order_item,
+           'id_order', oi.id_order,
+           'id_menu_item', oi.id_menu_item,
+           'name_menu', oi.name_menu,
+           'price', oi.price,
+           'quantity', oi.quantity,
+           'notes', oi.notes,
+           'subtotal', oi.subtotal
+         )) AS items
+         FROM order_item oi 
+         WHERE oi.id_order = o.id_order
+       ) i ON true
+       LEFT JOIN LATERAL (
+         SELECT json_build_object(
+           'id_payment', p.id_payment,
+           'id_order', p.id_order,
+           'payment_method', p.payment_method,
+           'card_type', p.card_type,
+           'last_four', p.last_four,
+           'reference_no', p.reference_no,
+           'amount_paid', p.amount_paid,
+           'cash_received', p.cash_received,
+           'change_amount', p.change_amount,
+           'paid_at', p.paid_at,
+           'created_at', p.paid_at
+         ) AS payment
+         FROM payment p 
+         WHERE p.id_order = o.id_order
+         LIMIT 1
+       ) p ON true
        WHERE o.id_order = $1`,
       [id]
     );
-    const order = orderResult.rows[0];
+    
+    const order = rows[0];
     if (!order) return null;
 
-    const itemResult = await client.query(
-      'SELECT * FROM order_item WHERE id_order = $1',
-      [id]
-    );
-    order.items = itemResult.rows;
-
-    const paymentResult = await client.query(
-      'SELECT * FROM payment WHERE id_order = $1',
-      [id]
-    );
-    order.payment = paymentResult.rows[0] || null;
-
+    // Parse JSON fields (already parsed by pg driver)
     return order;
   },
 
-  // [BIZ-02 FIX] Baca order dengan row-lock untuk mencegah double-pay
+  // [BIZ-02 FIX] Baca order dengan row-lock untuk mencegah double-pay - Optimized
   async findByIdForUpdate(id, client) {
-    const orderResult = await client.query(
-      `SELECT o.*, u.name_user AS kasir
-       FROM orders o LEFT JOIN users u ON u.id_user = o.id_user
+    const { rows } = await client.query(
+      `SELECT 
+         o.*,
+         u.name_user AS kasir,
+         COALESCE(i.items, '[]'::json) AS items
+       FROM orders o 
+       LEFT JOIN users u ON u.id_user = o.id_user
+       LEFT JOIN LATERAL (
+         SELECT json_agg(json_build_object(
+           'id_order_item', oi.id_order_item,
+           'id_order', oi.id_order,
+           'id_menu_item', oi.id_menu_item,
+           'name_menu', oi.name_menu,
+           'price', oi.price,
+           'quantity', oi.quantity,
+           'notes', oi.notes,
+           'subtotal', oi.subtotal
+         )) AS items
+         FROM order_item oi 
+         WHERE oi.id_order = o.id_order
+       ) i ON true
        WHERE o.id_order = $1
        FOR UPDATE OF o`,
       [id]
     );
-    const order = orderResult.rows[0];
+    
+    const order = rows[0];
     if (!order) return null;
-
-    const itemResult = await client.query(
-      'SELECT * FROM order_item WHERE id_order = $1',
-      [id]
-    );
-    order.items = itemResult.rows;
 
     return order;
   },

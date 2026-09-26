@@ -3,16 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { stockService } from '../../services/stockService';
 import { ArrowLeft } from 'lucide-react';
 import { Card, Badge, EmptyState } from '../../components/ui';
+import { formatDate } from '../../utils/format';
 
 const TYPE_BADGE = {
   TAMBAH: 'bg-secondary-container text-on-secondary-container',
   RUSAK: 'bg-error-container text-on-error-container',
   PENJUALAN: 'bg-tertiary-fixed text-on-tertiary-fixed-variant',
 };
-
-function formatDate(d) {
-  return new Date(d).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-}
 
 export default function StockHistoryPage() {
   const { id } = useParams();

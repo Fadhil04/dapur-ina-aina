@@ -1,13 +1,12 @@
 import { Plus } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { Card, Badge, Button } from '../ui';
-
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
+import { Card, Badge, Button, Toast } from '../ui';
+import { formatRupiah } from '../../utils/format';
+import { useState } from 'react';
 
 export default function MenuCard({ menu }) {
   const { addItem, cart } = useCart();
+  const [showToast, setShowToast] = useState(false);
   const inCart = cart.find((i) => i.id_menu_item === menu.id_menu_item);
   const outOfStock = menu.stock <= 0;
   const lowStock = menu.stock <= 5 && menu.stock > 0;
@@ -18,6 +17,7 @@ export default function MenuCard({ menu }) {
       name_menu: menu.name_menu,
       price: menu.price,
     });
+    setShowToast(true);
   };
 
   const stockStatus = outOfStock ? 'habis' : lowStock ? 'menipis' : 'aman';
@@ -50,6 +50,16 @@ export default function MenuCard({ menu }) {
           </Button>
         )}
       </div>
+      
+      {showToast && (
+        <Toast
+          title="Berhasil!"
+          message={`${menu.name_menu} ditambahkan ke keranjang`}
+          type="success"
+          onClose={() => setShowToast(false)}
+          duration={2000}
+        />
+      )}
     </Card>
   );
 }

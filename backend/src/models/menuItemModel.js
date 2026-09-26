@@ -47,13 +47,16 @@ const MenuItem = {
     return rows[0];
   },
 
-  // Update atribut menu (nama, harga, kategori)
+  // Update atribut menu (nama, harga, kategori) — safe untuk partial update
   async update(id, { id_category, name_menu, price }) {
     const { rows } = await pool.query(
       `UPDATE menu_item
-       SET id_category = $1, name_menu = $2, price = $3, updated_at = NOW()
+       SET id_category = COALESCE($1, id_category),
+           name_menu   = COALESCE($2, name_menu),
+           price       = COALESCE($3, price),
+           updated_at  = NOW()
        WHERE id_menu_item = $4 RETURNING *`,
-      [id_category, name_menu, price, id]
+      [id_category || null, name_menu || null, price || null, id]
     );
     return rows[0];
   },

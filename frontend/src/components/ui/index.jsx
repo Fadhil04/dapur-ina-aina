@@ -42,6 +42,7 @@ export function Button({ variant = 'primary', icon: Icon, children, className = 
     primary: 'bg-primary text-on-primary hover:bg-primary-container shadow-sm hover:shadow',
     secondary: 'bg-secondary text-on-secondary hover:bg-secondary/90 shadow-sm',
     neutral: 'bg-surface-container-high hover:bg-surface-variant text-on-surface',
+    danger: 'bg-error text-on-error hover:bg-error/90 shadow-sm hover:shadow',
     disabled: 'bg-surface-dim text-outline cursor-not-allowed',
   };
   return (

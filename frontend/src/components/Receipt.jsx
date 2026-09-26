@@ -1,24 +1,27 @@
 import { Printer, X } from 'lucide-react';
-
-function formatRupiah(n) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
-}
-
-function formatDate(d) {
-  return new Date(d).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
-}
+import { formatRupiah, formatDate } from '../utils/format';
 
 export function Receipt({ order, payment }) {
   const isLunas = order.status === 'LUNAS' || payment;
   const paymentMethod = payment?.payment_method || order.payment?.payment_method;
   const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
+  const handlePrint = () => {
+    document.body.classList.add('has-print-receipt');
+    window.print();
+    // Bersihkan class setelah dialog print ditutup
+    setTimeout(() => {
+      document.body.classList.remove('has-print-receipt');
+    }, 1000);
+  };
+
   return (
     <div className="w-full">
       {/* Preview Container - Web View */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Struk Content - 80mm thermal width (320px @ 96dpi) */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-outline-variant/30">
+        {/* Struk Content - 80mm thermal width */}
         <div 
+          id="receipt-print-area"
           className="mx-auto bg-white p-4"
           style={{ width: '320px', fontFamily: 'monospace', fontSize: '11px', lineHeight: '1.4' }}
         >
@@ -135,36 +138,14 @@ export function Receipt({ order, payment }) {
         {/* Print Button - Visible in Web, Hidden in Print */}
         <div className="bg-gray-50 p-4 border-t border-gray-200 flex gap-2 print:hidden">
           <button
-            onClick={() => window.print()}
-            className="flex-1 flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-label-lg hover:bg-primary-container transition-colors"
+            type="button"
+            onClick={handlePrint}
+            className="flex-1 flex items-center justify-center gap-2 bg-primary text-on-primary px-4 py-2.5 rounded-lg font-label-lg hover:opacity-90 active:scale-[0.99] transition-all shadow-sm"
           >
             <Printer size={20} /> Cetak Struk
           </button>
         </div>
       </div>
-
-      {/* Print-only CSS */}
-      <style>{`
-        @media print {
-          body, html {
-            margin: 0;
-            padding: 0;
-            width: 80mm;
-          }
-          .print\\:hidden {
-            display: none !important;
-          }
-          @page {
-            size: 80mm auto;
-            margin: 0;
-            padding: 0;
-          }
-          * {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-        }
-      `}</style>
     </div>
   );
 }

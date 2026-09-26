@@ -6,11 +6,13 @@ const Payment       = require('../models/paymentModel');
 const StockMovement = require('../models/stockMovementModel');
 
 const paySchema = z.object({
-  payment_method: z.enum(['TUNAI', 'DEBIT', 'KREDIT', 'QRIS'], { errorMap: () => ({ message: 'Metode pembayaran tidak valid' }) }),
-  amount_paid:    z.coerce.number().positive('Nominal bayar harus lebih dari 0'),
-  card_type:      z.string().optional(),
-  last_four:      z.string().optional(),
-  reference_no:   z.string().optional(),
+  payment_method: z.enum(['TUNAI', 'DEBIT', 'KREDIT', 'QRIS'], {
+    errorMap: () => ({ message: 'Metode pembayaran tidak valid' }),
+  }),
+  amount_paid: z.coerce.number().positive('Nominal bayar harus lebih dari 0'),
+  card_type: z.string().optional().nullable(),
+  last_four: z.string().optional().nullable(),
+  reference_no: z.string().optional().nullable(),
 });
 
 exports.paySchema = paySchema;
@@ -81,15 +83,16 @@ exports.processPayment = async (req, res, next) => {
     }
 
     const changeAmount = payment_method === 'TUNAI' ? amount_paid - order.total_amount : 0;
+    const cashReceived = payment_method === 'TUNAI' ? Number(amount_paid) : null;
 
     await Payment.create({
       id_order:      orderId,
       payment_method,
       amount_paid:   order.total_amount,
-      cash_received: payment_method === 'TUNAI' ? amount_paid : null,
+      cash_received: cashReceived,
       change_amount: changeAmount,
-      card_type:     card_type  || null,
-      last_four:     last_four  || null,
+      card_type:     card_type || null,
+      last_four:     last_four || null,
       reference_no:  reference_no || null,
     }, client);
 
@@ -104,7 +107,8 @@ exports.processPayment = async (req, res, next) => {
         invoice_number: order.invoice_number,
         total_amount:   order.total_amount,
         payment_method,
-        amount_paid,
+        amount_paid:    order.total_amount,
+        cash_received:  cashReceived,
         change_amount:  changeAmount,
       },
     });
