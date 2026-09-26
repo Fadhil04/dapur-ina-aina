@@ -29,9 +29,10 @@ export default function LoginPage() {
       const target = data.data.user.role === 'admin' ? '/dashboard' : '/orders';
       navigate(target);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login gagal. Periksa username dan password.');
-    } finally {
+      const errorMsg = err.response?.data?.message || 'Login gagal. Periksa username dan password.';
+      setError(errorMsg);
       setLoading(false);
+      // Error akan tetap terlihat sampai user submit lagi
     }
   };
 
@@ -85,7 +86,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-4 py-3 rounded-xl border border-error">
+            <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-4 py-3 rounded-xl border border-error animate-fade-in">
               {error}
             </div>
           )}

@@ -49,8 +49,8 @@ export default function CartPage() {
       clearCart();
       setSuccess(res.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal membuat pesanan. Coba lagi.');
-    } finally {
+      const errorMsg = err.response?.data?.message || 'Gagal membuat pesanan. Coba lagi.';
+      setError(errorMsg);
       setLoading(false);
     }
   };
@@ -245,7 +245,7 @@ export default function CartPage() {
               )}
 
               {error && (
-                <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-md rounded-xl border border-error">
+                <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-md rounded-xl border border-error animate-fade-in">
                   {error}
                 </div>
               )}

@@ -82,9 +82,10 @@ export default function BillingPage() {
       setSuccessData(res.data);
       setShowConfirm(false);
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal memproses pembayaran.');
-    } finally {
+      const errorMsg = err.response?.data?.message || 'Gagal memproses pembayaran.';
+      setError(errorMsg);
       setLoading(false);
+      setShowConfirm(false);
     }
   };
 
@@ -192,7 +193,7 @@ export default function BillingPage() {
             )}
 
             {error && (
-              <div className="text-on-error-container text-body-sm font-body-sm bg-error-container px-space-lg py-space-md rounded-xl border border-error mb-space-lg">
+              <div className="text-on-error-container text-body-sm font-body-sm bg-error-container px-space-lg py-space-md rounded-xl border border-error mb-space-lg animate-fade-in">
                 {error}
               </div>
             )}

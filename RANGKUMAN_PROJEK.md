@@ -83,8 +83,7 @@ dapur_ina_aina/ (ROOT MONOREPO)
 ├── backend/                    # Express.js REST API
 │   ├── src/
 │   │   ├── config/            # Konfigurasi Database, Middleware
-│   │   │   ├── db.js          # PostgreSQL Pool Connection
-│   │   │   └── session.js     # JWT Configuration
+│   │   │   └── db.js          # PostgreSQL Pool Connection
 │   │   ├── controllers/       # Controller Business Logic
 │   │   │   ├── authController.js      # Login, Logout, JWT Auth
 │   │   │   ├── menuController.js      # CRUD Menu & Kategori
@@ -107,26 +106,30 @@ dapur_ina_aina/ (ROOT MONOREPO)
 │   │   │   ├── api.js         # Master Router /api/v1
 │   │   │   ├── authRoutes.js          # /auth
 │   │   │   ├── menuRoutes.js          # /menu
-│   │   │   ├── orderRoutes.js         # /orders
+│   │   │   ├── orderRoutes.js         # /orders (includes /orders/report/excel)
 │   │   │   ├── stockRoutes.js         # /stock (admin only)
-│   │   │   ├── dashboardRoutes.js     # /dashboard (admin only)
-│   │   │   └── reportRoutes.js        # /reports (admin only)
-│   │   └── server.js          # Express Server Entry Point
+│   │   │   └── dashboardRoutes.js     # /dashboard (admin only)
 │   ├── tests/                 # Automated Tests
 │   │   └── e2e_flow.test.js   # E2E Test Suite
 │   ├── scripts/               # Database & Migration Scripts
 │   │   ├── update_passwords.js
-│   │   └── migrate_add_image.js
-│   └── package.json           # Backend Dependencies
+│   │   ├── migrate_add_image.js
+│   │   └── add_image_to_menu.sql
+│   ├── server.js              # Express Server Entry Point
+│   └── package.json           # Backend Dependencies (~1313 LOC)
 ├── frontend/                  # React SPA Application
 │   ├── src/
+│   │   ├── api/              # API Client Configuration
+│   │   │   └── client.js             # Axios Instance & Interceptors
 │   │   ├── components/        # Reusable UI Components
 │   │   │   ├── ui/            # Base UI Components
 │   │   │   │   ├── Toast.jsx          # Notification Toast
 │   │   │   │   ├── Modal.jsx          # Dialog Modal
 │   │   │   │   ├── LoadingSkeleton.jsx
 │   │   │   │   ├── KpiCard.jsx        # KPI Stat Card
-│   │   │   │   └── EmptyState.jsx     # Empty State UI
+│   │   │   │   ├── EmptyState.jsx     # Empty State UI
+│   │   │   │   ├── index.jsx          # UI Components Barrel Export
+│   │   │   │   └── ui.js              # Legacy UI Utils
 │   │   │   ├── customer/      # Customer-Facing Components
 │   │   │   │   ├── MenuCard.jsx       # Menu Item Card
 │   │   │   │   └── CategoryPills.jsx  # Category Filter Pills
@@ -135,11 +138,16 @@ dapur_ina_aina/ (ROOT MONOREPO)
 │   │   │   │   ├── RevenueChart.jsx   # Revenue Charts
 │   │   │   │   ├── OrderTable.jsx     # Orders Table
 │   │   │   │   └── LowStockAlert.jsx  # Low Stock Alerts
-│   │   │   └── layout/        # Layout Components
-│   │   │       ├── Header.jsx         # Navigation Header
-│   │   │       └── Footer.jsx         # Page Footer
+│   │   │   ├── layout/        # Layout Components
+│   │   │   │   ├── Header.jsx         # Navigation Header
+│   │   │   │   └── Footer.jsx         # Page Footer
+│   │   │   └── Receipt.jsx    # Thermal Receipt Printer Component
+│   │   ├── layouts/          # Page Layout Wrappers
+│   │   │   ├── CustomerLayout.jsx    # Customer-facing Layout
+│   │   │   └── DashboardLayout.jsx   # Protected Dashboard Layout
 │   │   ├── pages/            # Page Components
-│   │   │   ├── auth/LoginPage.jsx     # Login Page
+│   │   │   ├── auth/
+│   │   │   │   └── LoginPage.jsx     # Staff Login Page
 │   │   │   ├── customer/              # Customer Pages
 │   │   │   │   ├── MenuPage.jsx       # Menu Catalog
 │   │   │   │   └── CartPage.jsx       # Shopping Cart
@@ -150,14 +158,25 @@ dapur_ina_aina/ (ROOT MONOREPO)
 │   │   │       ├── BillingPage.jsx    # Billing & Payment
 │   │   │       ├── StockPage.jsx      # Stock Management
 │   │   │       └── StockHistoryPage.jsx # Stock Audit History
+│   │   ├── services/         # API Service Layer
+│   │   │   ├── api.js                # Legacy API Utils
+│   │   │   ├── authService.js        # Auth API Calls
+│   │   │   ├── menuService.js        # Menu API Calls
+│   │   │   ├── orderService.js       # Order API Calls
+│   │   │   ├── stockService.js       # Stock API Calls
+│   │   │   └── dashboardService.js   # Dashboard API Calls
 │   │   ├── context/          # React Context Providers
 │   │   │   ├── AuthContext.jsx        # Authentication State
 │   │   │   └── CartContext.jsx        # Shopping Cart State
 │   │   ├── hooks/            # Custom React Hooks
+│   │   │   └── useApi.js             # API Fetching Hook
 │   │   ├── utils/            # Utility Functions
+│   │   │   ├── format.js             # Number & Date Formatting
+│   │   │   └── billing.js            # Billing Calculations
 │   │   ├── App.jsx           # Main App Component & Routing
 │   │   └── main.jsx          # Application Entry Point
-│   └── package.json          # Frontend Dependencies
+│   ├── dist/                 # Production Build Output
+│   └── package.json          # Frontend Dependencies (~653 LOC)
 ├── package.json              # Root Monorepo Config
 │   ├── dev:backend           # Run backend dev server
 │   ├── dev:frontend          # Run frontend dev server
@@ -199,13 +218,27 @@ graph TD
 ```
 
 **API Endpoints**:
-- `POST /api/v1/auth/login` - Login staff
-- `GET /api/v1/menu` - Get all menu items
-- `POST /api/v1/orders` - Create new order
-- `GET /api/v1/orders` - List orders (filter by status)
-- `POST /api/v1/orders/:id/pay` - Process payment
-- `GET /api/v1/dashboard` - Dashboard metrics (admin only)
-- `GET /api/v1/reports/sales` - Sales report Excel (admin only)
+- `POST /api/v1/auth/login` - Login staff (rate limited: 5/15min)
+- `GET /api/v1/auth/me` - Get current user profile
+- `POST /api/v1/auth/logout` - Logout staff
+- `GET /api/v1/menu` - Get all menu items (public)
+- `GET /api/v1/menu/categories` - Get menu categories (public)
+- `GET /api/v1/menu/:id` - Get menu item by ID (public)
+- `POST /api/v1/menu` - Create menu item (admin only)
+- `PUT /api/v1/menu/:id` - Update menu item (admin only)
+- `DELETE /api/v1/menu/:id` - Deactivate menu item (admin only)
+- `POST /api/v1/orders/checkout` - Customer checkout (public)
+- `POST /api/v1/orders/create-for-customer` - Kasir create order (protected)
+- `GET /api/v1/orders` - List orders with filters (protected)
+- `GET /api/v1/orders/counts` - Get order counts by status (protected)
+- `GET /api/v1/orders/:id` - Get order detail (protected)
+- `POST /api/v1/orders/:id/pay` - Process payment (protected)
+- `GET /api/v1/orders/report/excel` - Excel sales report (admin only)
+- `GET /api/v1/dashboard/stats` - Dashboard statistics (admin only)
+- `GET /api/v1/dashboard/chart` - Revenue chart data (admin only)
+- `GET /api/v1/stock` - List all stock (admin only)
+- `POST /api/v1/stock/adjust` - Adjust stock manually (admin only)
+- `GET /api/v1/stock/:id/history` - Stock movement history (admin only)
 
 ---
 
@@ -455,21 +488,45 @@ node tests/e2e_flow.test.js
 
 ## 10. Fitur Terbaru & Status Perkembangan
 
-### ✅ Sudah Diimplementasikan:
-1. **Migrasi ke Monorepo** - React SPA + Express API terpisah
-2. **JWT Authentication** - Modern token-based authentication
-3. **React Router v6** - Client-side routing dengan lazy loading
-4. **Tailwind CSS** - Utility-first styling system
-5. **React Context API** - State management untuk auth & cart
-6. **Excel Report** - Admin-only sales report dengan date range
-7. **Responsive Design** - Mobile-first responsive layout
+### ✅ Sudah Diimplementasikan & Stabil:
+1. **Arsitektur Monorepo** - Backend Express.js + Frontend React SPA terpisah
+2. **JWT Authentication** - Token-based auth dengan rate limiting (5/15min)
+3. **React Router v6** - Client-side routing dengan protected routes & lazy loading
+4. **Tailwind CSS + Responsive Design** - Mobile-first responsive layout
+5. **React Context API** - State management untuk auth & shopping cart
+6. **Excel Sales Report** - Admin-only report dengan date range picker
+7. **Thermal Receipt Printing** - Struk digital untuk transaksi kasir
+8. **Concurrency Control** - Database transaction locks untuk stok
+9. **RBAC (Role-Based Access Control)** - Admin vs Kasir permission system
+10. **Dashboard Analytics** - Grafik omset 7 hari & real-time stats
 
-### 🔄 Dalam Pengembangan:
+### 🔧 Fitur Baru Terbaru (Sep 2026):
+1. **Admin-only Excel Report** - Laporan penjualan dengan rentang tanggal
+2. **Receipt After Payment** - Struk digital otomatis setelah pembayaran
+3. **Database Optimization** - Perbaikan query dan path imports
+4. **Payment Confirmation Flow** - Alur pembayaran yang lebih smooth
+5. **Login Rate Limiting** - Proteksi terhadap brute force attacks
+
+### 🚧 Perbaikan & Refactoring:
+1. **Route Security Fix** - Dashboard route protection (SEC-01)
+2. **Bug Fixes** - Perbaikan bug pada billing & payment flows
+3. **Code Cleanup** - Penghapusan file tidak terpakai & duplikasi
+4. **Database Schema** - Skema database yang konsisten
+
+### 📊 Statistik Proyek:
+- **Backend**: ~1,313 baris kode JavaScript
+- **Frontend**: ~653 baris kode JSX/JavaScript
+- **Total**: ~1,966 baris kode
+- **API Endpoints**: 20+ endpoints dengan RBAC protection
+- **Database Tables**: 7 tabel dengan relasi lengkap
+
+### 🔄 Potensi Pengembangan:
 1. **TypeScript Migration** - Migrasi dari JSX ke TypeScript
 2. **WebSocket Integration** - Real-time order notifications
 3. **PWA Support** - Installable web app untuk tablet/kasir
 4. **Redis Caching** - Caching untuk performance improvement
 5. **Docker Deployment** - Containerized deployment
+6. **QR Code Payment** - Integrasi dengan payment gateway lokal
 
 ### 📋 Kompatibilitas Browser:
 - Chrome 90+ (rekomendasi)
@@ -479,6 +536,7 @@ node tests/e2e_flow.test.js
 
 ---
 
-*Dokumentasi ini diperbarui terakhir: September 2026*
+*Dokumentasi ini diperbarui terakhir: September 26, 2026 (berdasarkan commit terbaru: 38a8fd4 "Memperbaiki laporan penjualan")*
 *Versi Sistem: 2.0.0 (Monorepo Edition)*
 *Architecture: Modern SPA + REST API*
+*Status: Production-ready dengan fitur lengkap untuk operasional restoran*

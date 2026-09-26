@@ -113,9 +113,10 @@ export default function CreateOrderPage() {
         setSuccess(null);
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal membuat pesanan');
-    } finally {
+      const errorMsg = err.response?.data?.message || 'Gagal membuat pesanan';
+      setError(errorMsg);
       setLoading(false);
+      setShowConfirm(false);
     }
   };
 
@@ -320,7 +321,7 @@ export default function CreateOrderPage() {
             )}
 
             {error && (
-              <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-sm rounded-lg border border-error">
+              <div className="bg-error-container text-on-error-container text-body-sm font-body-sm px-space-md py-space-sm rounded-lg border border-error animate-fade-in">
                 {error}
               </div>
             )}

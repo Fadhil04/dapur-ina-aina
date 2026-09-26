@@ -28,8 +28,8 @@ function MenuModal({ menu, categories, onClose, onSave }) {
       else      await menuService.create(form)
       onSave()
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal menyimpan menu.')
-    } finally {
+      const errorMsg = err.response?.data?.message || 'Gagal menyimpan menu.'
+      setError(errorMsg)
       setLoading(false)
     }
   }
@@ -70,7 +70,7 @@ function MenuModal({ menu, categories, onClose, onSave }) {
               className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://contoh.com/gambar.jpg" />
             <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">Masukkan URL gambar menu (format: .jpg, .png, .webp)</p>
           </div>
-          {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg">{error}</p>}
+          {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg animate-fade-in">{error}</p>}
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="flex-1 border border-outline-variant py-2 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low">Batal</button>
             <button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 rounded-xl font-label-lg text-label-lg disabled:opacity-60">
@@ -96,8 +96,8 @@ function AdjustModal({ menu, onClose, onSave }) {
       await stockService.adjustStock({ id_menu_item: menu.id_menu_item, ...form, quantity: Number(form.quantity) })
       onSave()
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mutasi stok.')
-    } finally {
+      const errorMsg = err.response?.data?.message || 'Gagal mutasi stok.'
+      setError(errorMsg)
       setLoading(false)
     }
   }
@@ -128,7 +128,7 @@ function AdjustModal({ menu, onClose, onSave }) {
             <input value={form.note} onChange={e => setForm(f=>({...f,note:e.target.value}))}
               className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" required />
           </div>
-          {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg">{error}</p>}
+          {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg animate-fade-in">{error}</p>}
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="flex-1 border border-outline-variant py-2 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low">Batal</button>
             <button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary-container text-on-primary py-2 rounded-xl font-label-lg text-label-lg disabled:opacity-60">
