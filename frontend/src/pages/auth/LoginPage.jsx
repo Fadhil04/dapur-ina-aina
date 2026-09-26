@@ -45,7 +45,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="font-headline-md text-headline-md text-on-surface">Dapur Ina Aina</h1>
-          <p className="font-body-sm text-body-sm text-on-surface-variant mt-2">Masuk ke sistem kasir</p>
+          
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,11 +100,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Demo: <span className="font-label-lg">admin</span> / <span className="font-label-lg">admin123</span>
-          </p>
-        </div>
+        
       </div>
 
     </div>

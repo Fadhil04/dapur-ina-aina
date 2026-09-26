@@ -6,7 +6,7 @@ import { stockService } from '../../services/stockService'
 import { menuService } from '../../services/menuService'
 import { formatRupiah } from '../../utils/format'
 
-import { Plus, Edit2, ArrowUpDown, History, Trash2 } from 'lucide-react'
+import { Plus, Edit2, ArrowUpDown, History, Trash2, Package } from 'lucide-react'
 
 function MenuModal({ menu, categories, onClose, onSave }) {
   const [form, setForm] = useState({
@@ -14,6 +14,7 @@ function MenuModal({ menu, categories, onClose, onSave }) {
     price:       menu?.price       ?? '',
     id_category: menu?.id_category ?? '',
     stock:       menu?.stock       ?? 0,
+    image_url:   menu?.image_url   ?? '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -63,6 +64,12 @@ function MenuModal({ menu, categories, onClose, onSave }) {
                 className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" min="0" />
             </div>
           )}
+          <div>
+            <label className="font-label-md text-label-md text-on-surface-variant">URL Gambar (Opsional)</label>
+            <input type="url" value={form.image_url} onChange={e => setForm(f=>({...f,image_url:e.target.value}))}
+              className="w-full mt-1 border border-outline-variant rounded-xl px-3 py-2 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40" placeholder="https://contoh.com/gambar.jpg" />
+            <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">Masukkan URL gambar menu (format: .jpg, .png, .webp)</p>
+          </div>
           {error && <p className="text-error font-label-md text-label-md bg-error-container/20 p-2 rounded-lg">{error}</p>}
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="flex-1 border border-outline-variant py-2 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low">Batal</button>
@@ -193,6 +200,7 @@ export default function StockPage() {
           <table className="w-full font-body-md text-body-md">
             <thead>
               <tr className="bg-surface-container-high/60 text-on-surface-variant font-label-md text-label-md uppercase tracking-wider border-b border-outline-variant">
+                <th className="text-left px-4 py-3">Gambar</th>
                 <th className="text-left px-4 py-3">Menu</th>
                 <th className="text-left px-4 py-3">Kategori</th>
                 <th className="text-right px-4 py-3">Harga</th>
@@ -203,6 +211,15 @@ export default function StockPage() {
             <tbody className="divide-y divide-outline-variant">
               {items.map(item => (
                 <tr key={item.id_menu_item} className={`hover:bg-surface-container-low/60 transition-colors ${item.stock <= 5 ? 'bg-error-container/20' : ''}`}>
+                  <td className="px-4 py-3">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name_menu} className="w-12 h-12 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center">
+                        <Package size={20} className="text-on-surface-variant opacity-50" />
+                      </div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-label-lg text-on-surface">{item.name_menu}</td>
                   <td className="px-4 py-3 text-on-surface-variant">{item.name_category}</td>
                   <td className="px-4 py-3 text-right text-on-surface">{formatRupiah(item.price)}</td>

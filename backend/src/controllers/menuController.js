@@ -9,12 +9,14 @@ const createMenuSchema = z.object({
   price:       z.coerce.number().positive('Harga harus lebih dari 0'),
   id_category: z.coerce.number().int().positive('Kategori wajib dipilih'),
   stock:       z.coerce.number().int().min(0).optional().default(0),
+  image_url:   z.string().url('URL gambar tidak valid').optional().or(z.literal('')),
 });
 
 const updateMenuSchema = z.object({
   name_menu:   z.string().min(1).optional(),
   price:       z.coerce.number().positive().optional(),
   id_category: z.coerce.number().int().positive().optional(),
+  image_url:   z.string().url('URL gambar tidak valid').optional().or(z.literal('')),
 });
 
 exports.createMenuSchema = createMenuSchema;

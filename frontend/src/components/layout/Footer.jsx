@@ -7,10 +7,7 @@ export function Footer() {
           <span className="hidden md:inline text-outline-variant">•</span>
           <span>Buka: 09:00 - 22:00 WIB</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          <span className="font-label-md text-label-md">Backend Connected</span>
-        </div>
+
       </div>
     </footer>
   );

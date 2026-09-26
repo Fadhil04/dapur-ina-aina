@@ -29,7 +29,6 @@ export function Receipt({ order, payment }) {
           <div className="text-center border-b border-gray-800 pb-2 mb-2">
             <div className="text-xl font-bold mb-1">🍳 DAPUR INA AINA</div>
             <div className="text-xs text-gray-600">Restoran & Café</div>
-            <div className="text-xs text-gray-600">Struk Pembayaran</div>
           </div>
 
           {/* INVOICE & TIME */}
@@ -78,9 +77,6 @@ export function Receipt({ order, payment }) {
                 </div>
               </div>
             ))}
-            <div className="text-xs text-gray-600 mt-1">
-              Total {totalItems} item(s)
-            </div>
           </div>
 
           {/* TOTALS */}
@@ -119,19 +115,13 @@ export function Receipt({ order, payment }) {
                   </div>
                 </>
               )}
-              <div className="text-xs text-green-600 font-bold mt-1">
-                ✓ PEMBAYARAN LUNAS
-              </div>
             </div>
           )}
 
           {/* FOOTER */}
           <div className="text-center border-t border-gray-800 pt-2">
             <div className="text-xs font-bold mb-1">Terima Kasih!</div>
-            <div className="text-xs text-gray-600 mb-2">Selamat menikmati pesanan Anda</div>
-            <div className="text-xs text-gray-600">
-              {new Date().toLocaleTimeString('id-ID')}
-            </div>
+            <div className="text-xs text-gray-600">Selamat menikmati pesanan Anda</div>
           </div>
         </div>
 

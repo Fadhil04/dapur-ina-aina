@@ -5,7 +5,7 @@ const MenuItem = {
   // Ambil semua menu, opsional filter
   async findAll({ categoryId, keyword, activeOnly = false } = {}) {
     let query = `
-      SELECT m.id_menu_item, m.name_menu, m.price, m.stock, m.is_active,
+      SELECT m.id_menu_item, m.name_menu, m.price, m.stock, m.is_active, m.image_url,
              c.id_category, c.name_category
       FROM menu_item m
       JOIN category c ON c.id_category = m.id_category
@@ -38,25 +38,26 @@ const MenuItem = {
     return rows[0];
   },
 
-  async create({ id_category, name_menu, price, stock }, client = pool) {
+  async create({ id_category, name_menu, price, stock, image_url }, client = pool) {
     const { rows } = await client.query(
-      `INSERT INTO menu_item (id_category, name_menu, price, stock)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [id_category, name_menu, price, stock]
+      `INSERT INTO menu_item (id_category, name_menu, price, stock, image_url)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [id_category, name_menu, price, stock, image_url || null]
     );
     return rows[0];
   },
 
-  // Update atribut menu (nama, harga, kategori) — safe untuk partial update
-  async update(id, { id_category, name_menu, price }) {
+  // Update atribut menu (nama, harga, kategori, gambar) — safe untuk partial update
+  async update(id, { id_category, name_menu, price, image_url }) {
     const { rows } = await pool.query(
       `UPDATE menu_item
        SET id_category = COALESCE($1, id_category),
            name_menu   = COALESCE($2, name_menu),
            price       = COALESCE($3, price),
+           image_url   = COALESCE($4, image_url),
            updated_at  = NOW()
-       WHERE id_menu_item = $4 RETURNING *`,
-      [id_category || null, name_menu || null, price || null, id]
+       WHERE id_menu_item = $5 RETURNING *`,
+      [id_category || null, name_menu || null, price || null, image_url || null, id]
     );
     return rows[0];
   },

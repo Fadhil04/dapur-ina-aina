@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { orderService } from '../../services/orderService';
 import { calculateChange } from '../../utils/billing';
-import { CheckCircle, ArrowLeft, AlertCircle, Printer, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, AlertCircle, ShieldAlert } from 'lucide-react';
 import { Card, Button, Modal } from '../../components/ui';
 import { Toast } from '../../components/ui/Toast';
 import { Receipt } from '../../components/Receipt';
@@ -103,14 +103,6 @@ export default function BillingPage() {
     );
 
   const isLunas = order.status === 'LUNAS' || successData;
-
-  const handlePrintReceipt = () => {
-    document.body.classList.add('has-print-receipt');
-    window.print();
-    setTimeout(() => {
-      document.body.classList.remove('has-print-receipt');
-    }, 1000);
-  };
 
   return (
     <div className="w-full max-w-[1440px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-md lg:py-space-xl">
@@ -220,31 +212,7 @@ export default function BillingPage() {
           </Card>
         )}
 
-        {/* Panel sukses setelah bayar */}
-        {isLunas && successData && (
-          <Card className="p-space-lg text-center bg-secondary-container border-2 border-secondary mt-space-lg print:hidden">
-            <CheckCircle className="mx-auto text-secondary mb-space-lg" size={48} />
-            <p className="font-headline-md text-headline-md text-on-secondary-container mb-space-md">Pembayaran Berhasil!</p>
-            <p className="text-body-md text-on-secondary-container-variant mb-space-lg">
-              Invoice: <span className="font-mono font-bold text-on-secondary-container">{successData.invoice_number}</span>
-            </p>
-            <div className="flex gap-space-md justify-center flex-wrap">
-              <Button
-                variant="neutral"
-                onClick={handlePrintReceipt}
-                className="gap-space-sm"
-              >
-                <Printer size={18} /> Cetak Struk
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => navigate('/orders')}
-              >
-                {isAdmin ? 'Kembali ke Riwayat Pesanan' : 'Pesanan Berikutnya'}
-              </Button>
-            </div>
-          </Card>
-        )}
+
       </div>
 
       {/* Konfirmasi Modal */}
@@ -282,20 +250,10 @@ export default function BillingPage() {
                 <>
                   {(method === 'DEBIT' || method === 'KREDIT') && (
                     <>
-                      <div>
-                        <p className="text-on-surface-variant">Jenis Kartu</p>
-                        <p className="font-bold text-on-surface">{cardType || '—'}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-on-surface-variant">4 Digit Akhir</p>
-                        <p className="font-bold text-on-surface">{lastFour ? `****${lastFour}` : '—'}</p>
-                      </div>
+                      
                     </>
                   )}
-                  <div className="col-span-2">
-                    <p className="text-on-surface-variant">No. Referensi</p>
-                    <p className="font-bold text-on-surface">{referenceNo || '—'}</p>
-                  </div>
+                
                 </>
               )}
             </div>

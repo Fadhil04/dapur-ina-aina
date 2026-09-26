@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { orderService } from '../../services/orderService';
 import OrderTable from '../../components/admin/OrderTable';
 import { Badge, Card, SearchInput } from '../../components/ui';
-import { RefreshCw } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -71,13 +70,6 @@ export default function OrdersPage() {
               : 'Daftar transaksi pelanggan yang telah selesai dan lunas'}
           </p>
         </div>
-        <button
-          onClick={() => refetch()}
-          className="flex items-center gap-space-sm px-space-lg py-space-md rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface-variant font-label-lg text-label-lg transition-all"
-        >
-          <RefreshCw size={18} className={isFetching ? 'animate-spin' : ''} />
-          <span className="hidden sm:inline">{isFetching ? 'Memperbarui...' : 'Refresh'}</span>
-        </button>
       </div>
 
       {/* Stats KPI */}

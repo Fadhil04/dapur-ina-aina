@@ -29,9 +29,7 @@ export function Header() {
         
         {/* Logo & Brand */}
         <NavLink to="/" className="flex items-center gap-space-md shrink-0">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-            <span className="font-bold text-on-primary text-lg">🍳</span>
-          </div>
+          <img src="/logo_dapur_ina_aina.png" alt="Dapur Ina Aina Logo" className="w-10 h-10 rounded-xl object-cover" />
           <h1 className="hidden md:block font-headline-sm text-headline-sm text-on-surface font-bold">
             Dapur Ina Aina
           </h1>

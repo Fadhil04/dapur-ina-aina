@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { menuService } from '../../services/menuService';
 import { orderService } from '../../services/orderService';
 import { Button, Card, Modal, Toast, SearchInput, LoadingCardSkeleton, EmptyState } from '../../components/ui.js';
-import { Plus, Minus, Trash2, ShoppingCart, CheckCircle } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingCart, CheckCircle, Package } from 'lucide-react';
 import CategoryPills from '../../components/customer/CategoryPills';
 
 import { formatRupiah } from '../../utils/format';
@@ -192,26 +192,55 @@ export default function CreateOrderPage() {
             <EmptyState title="Menu Tidak Ditemukan" description="Coba ubah filter atau cari dengan kata kunci lain." />
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-space-lg">
-              {menuItems.map((menu) => (
-                <Card key={menu.id_menu_item} className="p-space-lg flex flex-col">
-                  <h3 className="font-title-md text-title-md text-on-surface line-clamp-2">{menu.name_menu}</h3>
-                  <p className="font-currency-md text-currency-md text-primary mt-space-xs">{formatRupiah(menu.price)}</p>
-                  <div className="flex-1" />
-                  {menu.stock <= 0 ? (
-                    <div className="mt-space-md px-space-md py-space-sm rounded-lg bg-error-container text-on-error-container text-center font-label-md text-label-md">
-                      Habis
+              {menuItems.map((menu) => {
+                const outOfStock = menu.stock <= 0;
+                const lowStock = menu.stock <= 5 && menu.stock > 0;
+                return (
+                  <Card key={menu.id_menu_item} className={`flex flex-col overflow-hidden transition-transform hover:-translate-y-1 ${outOfStock ? 'opacity-60' : ''}`}>
+                    {/* Gambar Menu */}
+                    {menu.image_url ? (
+                      <div className="w-full h-32 overflow-hidden bg-surface-container">
+                        <img 
+                          src={menu.image_url} 
+                          alt={menu.name_menu}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-32 bg-gradient-to-br from-surface-container to-surface-container-high flex items-center justify-center">
+                        <Package size={40} className="text-on-surface-variant opacity-30" />
+                      </div>
+                    )}
+                    
+                    <div className="p-space-lg flex flex-col flex-1">
+                      <div className="flex justify-between items-start gap-space-md mb-space-sm">
+                        <h3 className="font-title-md text-title-md text-on-surface line-clamp-2 flex-1">{menu.name_menu}</h3>
+                        {lowStock && <span className="text-label-sm font-label-sm text-red bg-white-container px-1.5 py-0.5 rounded whitespace-nowrap">Sisa {menu.stock}</span>}
+                        {outOfStock && <span className="text-label-sm font-label-sm text-error bg-error-container px-1.5 py-0.5 rounded whitespace-nowrap">Habis</span>}
+                      </div>
+                      <p className="font-currency-md text-currency-md text-primary mb-space-sm">{formatRupiah(menu.price)}</p>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                        <Package size={12} /> Stok: {menu.stock}
+                      </p>
+                      <div className="flex-1" />
+                      {outOfStock ? (
+                        <div className="mt-space-md px-space-md py-space-sm rounded-lg bg-error-container text-on-error-container text-center font-label-md text-label-md">
+                          Stok Habis
+                        </div>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          onClick={() => addToCart(menu)}
+                          className="mt-space-md w-full gap-space-xs"
+                        >
+                          <Plus size={16} /> Tambah
+                        </Button>
+                      )}
                     </div>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      onClick={() => addToCart(menu)}
-                      className="mt-space-md w-full gap-space-xs"
-                    >
-                      <Plus size={16} /> Tambah
-                    </Button>
-                  )}
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
